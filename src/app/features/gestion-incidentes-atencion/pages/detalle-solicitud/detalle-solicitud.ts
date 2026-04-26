@@ -103,17 +103,25 @@ export class DetalleSolicitud implements OnInit {
   readonly displayData = computed(
     () => this.detail() ?? this.toPreviewDetail(this.previewIncident())
   );
+  readonly isTechnicianView = computed(() => this.router.url.startsWith('/tecnico'));
   readonly canRespondRequest = computed(() => {
     const detail = this.detail();
-    return !!detail && detail.estado_solicitud === 'PENDIENTE';
+    return (
+      !this.isTechnicianView() &&
+      !!detail &&
+      detail.id_solicitud_taller > 0 &&
+      detail.estado_solicitud === 'PENDIENTE'
+    );
   });
   readonly isAccepted = computed(() => this.detail()?.estado_solicitud === 'ACEPTADA');
   readonly isRejected = computed(() => this.detail()?.estado_solicitud === 'RECHAZADA');
+  readonly showAssignmentSection = computed(
+    () => !this.isTechnicianView() && this.isAccepted()
+  );
   readonly canAssignResources = computed(
     () =>
-      this.isAccepted() &&
+      this.showAssignmentSection() &&
       !this.assignmentSummary() &&
-      !this.currentServiceState() &&
       !this.assignmentLocked()
   );
   readonly canUpdateStatus = computed(() => !!this.currentServiceState());
@@ -171,6 +179,11 @@ export class DetalleSolicitud implements OnInit {
       }
 
       this.requestId.set(parsedId);
+      if (this.isTechnicianView()) {
+        this.loadTechnicianIncident(parsedId);
+        return;
+      }
+
       this.loadDetail(parsedId);
     });
   }
@@ -257,6 +270,13 @@ export class DetalleSolicitud implements OnInit {
       return;
     }
 
+    if (detail.estado_solicitud !== 'ACEPTADA') {
+      this.assignmentError.set(
+        'La solicitud debe estar aceptada antes de asignar tecnico y unidad movil.'
+      );
+      return;
+    }
+
     if (this.assignmentForm.invalid) {
       this.assignmentForm.markAllAsTouched();
       this.assignmentError.set(
@@ -269,9 +289,9 @@ export class DetalleSolicitud implements OnInit {
     if (
       rawValue.tiempo_estimado_min !== null &&
       rawValue.tiempo_estimado_min !== undefined &&
-      rawValue.tiempo_estimado_min < 0
+      rawValue.tiempo_estimado_min <= 0
     ) {
-      this.assignmentError.set('El tiempo estimado no puede ser negativo.');
+      this.assignmentError.set('El tiempo estimado debe ser mayor a 0.');
       return;
     }
 
@@ -402,13 +422,22 @@ export class DetalleSolicitud implements OnInit {
   }
 
   goBack(): void {
-    void this.router.navigate(['/taller/solicitudes']);
+    void this.router.navigate([this.isTechnicianView() ? '/tecnico/asignaciones' : '/taller/solicitudes']);
   }
 
   private respondToRequest(action: 'aceptar' | 'rechazar'): void {
     const requestId = this.requestId();
-    if (!requestId) {
+    const currentDetail = this.detail();
+
+    if (!requestId || !currentDetail?.id_solicitud_taller) {
       this.responseError.set('No se identifico la solicitud a responder.');
+      return;
+    }
+
+    if (currentDetail.estado_solicitud !== 'PENDIENTE') {
+      this.responseError.set(
+        'La solicitud ya no se encuentra pendiente y no puede responderse nuevamente.'
+      );
       return;
     }
 
@@ -421,7 +450,6 @@ export class DetalleSolicitud implements OnInit {
       .pipe(finalize(() => this.responseLoading.set(false)))
       .subscribe({
         next: (response) => {
-          const currentDetail = this.detail();
           if (currentDetail) {
             this.detail.set({
               ...currentDetail,
@@ -438,6 +466,8 @@ export class DetalleSolicitud implements OnInit {
             this.responseSuccess.set(
               'Solicitud aceptada correctamente. Ahora puedes asignar tecnico y unidad movil.'
             );
+            this.assignmentLocked.set(false);
+            this.assignmentSummary.set(null);
             this.loadAssignmentOptions(response.id_incidente);
             this.loadCurrentState(response.id_incidente);
           } else {
@@ -471,6 +501,10 @@ export class DetalleSolicitud implements OnInit {
           this.assignmentLocked.set(false);
           this.tecnicos.set(tecnicos);
           this.unidadesMoviles.set(unidades);
+          this.assignmentForm.patchValue({
+            id_tecnico: tecnicos[0]?.id_tecnico ?? null,
+            id_unidad_movil: unidades[0]?.id_unidad_movil ?? null,
+          });
         },
         error: (error) => {
           this.assignmentError.set(
@@ -490,7 +524,6 @@ export class DetalleSolicitud implements OnInit {
       .subscribe({
         next: (response) => {
           this.currentServiceState.set(response);
-          this.assignmentLocked.set(true);
         },
         error: (error) => {
           const detail = error?.error?.detail as string | undefined;
@@ -540,6 +573,52 @@ export class DetalleSolicitud implements OnInit {
     this.assignmentSuccess.set('');
     this.statusError.set('');
     this.statusSuccess.set('');
+  }
+
+  private loadTechnicianIncident(idIncidente: number): void {
+    this.loading.set(true);
+    this.errorMessage.set('');
+    this.responseError.set('');
+    this.assignmentError.set('');
+    this.statusError.set('');
+    this.confirmRejectOpen.set(false);
+    this.assignmentLocked.set(true);
+    this.assignmentSummary.set(null);
+    this.currentServiceState.set(null);
+    this.tecnicos.set([]);
+    this.unidadesMoviles.set([]);
+
+    const preview = this.previewIncident();
+    if (preview && preview.id_incidente === idIncidente) {
+      this.detail.set(this.toPreviewDetail(preview));
+      this.loading.set(false);
+      return;
+    }
+
+    this.detail.set({
+      id_solicitud_taller: 0,
+      id_incidente: idIncidente,
+      id_taller: 0,
+      distancia_km: null,
+      puntaje_asignacion: null,
+      estado_solicitud: 'ASIGNADA',
+      fecha_envio: new Date().toISOString(),
+      fecha_respuesta: null,
+      titulo_incidente: `Incidente asignado #${idIncidente}`,
+      descripcion_texto:
+        'Vista del tecnico para revisar datos operativos del incidente asignado.',
+      direccion_referencia: 'No disponible en esta vista',
+      latitud: null,
+      longitud: null,
+      fecha_reporte: new Date().toISOString(),
+      id_tipo_incidente: 0,
+      tipo_incidente: 'ASIGNADO',
+      id_prioridad: 1,
+      prioridad: 'ALTA',
+      id_estado_servicio_actual: 2,
+      estado_servicio_actual: 'ASIGNADO',
+    });
+    this.loading.set(false);
   }
 
   private toPreviewDetail(
