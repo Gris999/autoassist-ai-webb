@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { TokenService } from '../../../core/services/token.service';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 
 export interface ActualizarUbicacionRequest {
   latitud: number;

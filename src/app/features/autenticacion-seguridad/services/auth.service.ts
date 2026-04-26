@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 import { AuthMeResponse } from '../models/auth-me-response.model';
 import { LoginRequest } from '../models/login-request.model';
 import { LoginResponse } from '../models/login-response.model';
