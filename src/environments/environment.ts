@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://TU_BACKEND_PRODUCCION',
+  apiUrl: 'https://autoassist-ai-backendd.onrender.com/api/v1',
 };
