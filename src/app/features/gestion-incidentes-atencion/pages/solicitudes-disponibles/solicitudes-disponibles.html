@@ -159,13 +159,13 @@
 
             <p>{{ incidente.descripcion_texto || 'Sin descripcion' }}</p>
 
-            <a
-              class="details-link"
-              [routerLink]="['/taller/solicitudes', getDetalleRouteId(incidente)]"
-              [state]="{ incidentePreview: incidente }"
+            <button
+              type="button"
+              class="details-link details-link-button"
+              (click)="abrirDetalle(incidente)"
             >
               Ver detalle
-            </a>
+            </button>
           </div>
         }
       </div>

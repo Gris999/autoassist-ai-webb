@@ -175,6 +175,18 @@ export class SolicitudesDisponibles implements OnInit, OnDestroy {
     this.incidentesService.getIncidentesDisponibles().subscribe({
       next: (response) => {
         this.incidentes = response ?? [];
+        const missingRequestIds = this.incidentes.filter(
+          (incidente) => !incidente.id_solicitud_taller
+        ).length;
+
+        if (missingRequestIds > 0) {
+          this.successMessage = '';
+          this.errorMessage =
+            missingRequestIds === 1
+              ? 'Hay 1 incidente sin id_solicitud_taller. Ese registro no podra abrir el detalle del taller.'
+              : `Hay ${missingRequestIds} incidentes sin id_solicitud_taller. Esos registros no podran abrir el detalle del taller.`;
+        }
+
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -188,6 +200,29 @@ export class SolicitudesDisponibles implements OnInit, OnDestroy {
 
   getDetalleRouteId(incidente: IncidenteDisponible): number {
     return incidente.id_solicitud_taller ?? incidente.id_incidente;
+  }
+
+  abrirDetalle(incidente: IncidenteDisponible): void {
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    if (this.isTechnicianView) {
+      void this.router.navigate([this.detailBaseRoute, incidente.id_incidente], {
+        state: { incidentePreview: incidente },
+      });
+      return;
+    }
+
+    if (!incidente.id_solicitud_taller) {
+      this.errorMessage =
+        'No se encontro el identificador de solicitud para abrir el detalle.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    void this.router.navigate(['/taller/solicitudes', incidente.id_solicitud_taller], {
+      state: { incidentePreview: incidente },
+    });
   }
 
   cargarAsignacionesTecnico(): void {
