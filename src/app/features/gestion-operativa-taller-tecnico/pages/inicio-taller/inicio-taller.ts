@@ -3,6 +3,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
 
+import { IncidenteDisponible } from '../../../gestion-incidentes-atencion/models/incidente-atencion.model';
 import { IncidentesService } from '../../../gestion-incidentes-atencion/services/incidentes.service';
 import { TokenService } from '../../../../core/services/token.service';
 import { DisponibilidadTecnicoResponse } from '../../models/technician-management.model';
@@ -34,7 +35,7 @@ export class InicioTaller implements OnInit {
 
   readonly loading = signal(true);
   readonly errorMessage = signal('');
-  readonly incidentes = signal<any[]>([]);
+  readonly incidentes = signal<IncidenteDisponible[]>([]);
   readonly availabilityLoading = signal(true);
   readonly availabilitySaving = signal(false);
   readonly availabilityError = signal('');
@@ -214,7 +215,7 @@ export class InicioTaller implements OnInit {
         : 'Aun no hay actividad reciente. Cuando ingresen solicitudes nuevas apareceran aqui.';
     }
 
-    return `${firstIncident.titulo || 'Incidente sin titulo'} - Estado ${firstIncident.id_estado_servicio_actual || 'N/D'} - Prioridad ${firstIncident.id_prioridad || 'N/D'}`;
+    return `${firstIncident.titulo || 'Incidente sin titulo'} - Estado ${firstIncident.estado_servicio_actual || 'N/D'} - Prioridad ${firstIncident.prioridad || 'N/D'}`;
   });
 
   readonly availabilityMessage = computed(() => {
@@ -281,7 +282,13 @@ export class InicioTaller implements OnInit {
           id_incidente: TECNICO_INCIDENTE_ASIGNADO_ID,
           titulo: 'Incidente asignado actual',
           id_prioridad: 1,
-          id_estado_servicio_actual: 'EN_CAMINO',
+          id_estado_servicio_actual: 3,
+          estado_servicio_actual: 'EN_CAMINO',
+          fecha_reporte: new Date().toISOString(),
+          id_vehiculo: 0,
+          id_tipo_incidente: 0,
+          tipo_incidente: 'ASIGNADO',
+          prioridad: 'ALTA',
         },
       ]);
       this.loading.set(false);

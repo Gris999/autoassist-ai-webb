@@ -35,77 +35,69 @@ export class IncidentesService {
   private readonly apiUrl = environment.apiUrl;
 
   getIncidentesDisponibles(): Observable<IncidenteDisponible[]> {
-    return this.http.get<IncidenteDisponible[]>(
-      `${this.apiUrl}/incidentes/disponibles`
-    );
+    return this.http.get<IncidenteDisponible[]>(`${this.apiUrl}/incidentes/disponibles`);
   }
 
-  getDetalleSolicitudAtencion(
-    idSolicitudTaller: number
-  ): Observable<SolicitudAtencionDetalle> {
+  getDetalleSolicitudAtencion(idSolicitudTaller: number): Observable<SolicitudAtencionDetalle> {
     return this.http.get<SolicitudAtencionDetalle>(
-      `${this.apiUrl}/incidentes/taller/solicitudes-atencion/${idSolicitudTaller}`
+      `${this.apiUrl}/incidentes/taller/solicitudes-atencion/${idSolicitudTaller}`,
     );
   }
 
   responderSolicitudAtencion(
     idSolicitudTaller: number,
-    accion: 'aceptar' | 'rechazar'
+    accion: 'aceptar' | 'rechazar',
   ): Observable<ResponderSolicitudResponse> {
     const payload: ResponderSolicitudRequest = { accion };
 
     return this.http.patch<ResponderSolicitudResponse>(
       `${this.apiUrl}/incidentes/taller/solicitudes-atencion/${idSolicitudTaller}/respuesta`,
-      payload
+      payload,
     );
   }
 
   getTecnicosDisponibles(idIncidente: number): Observable<TecnicoDisponible[]> {
     return this.http.get<TecnicoDisponible[]>(
-      `${this.apiUrl}/incidentes/taller/incidentes/${idIncidente}/tecnicos-disponibles`
+      `${this.apiUrl}/incidentes/taller/incidentes/${idIncidente}/tecnicos-disponibles`,
     );
   }
 
-  getUnidadesMovilesDisponibles(
-    idIncidente: number
-  ): Observable<UnidadMovilDisponible[]> {
+  getUnidadesMovilesDisponibles(idIncidente: number): Observable<UnidadMovilDisponible[]> {
     return this.http.get<UnidadMovilDisponible[]>(
-      `${this.apiUrl}/incidentes/taller/incidentes/${idIncidente}/unidades-moviles-disponibles`
+      `${this.apiUrl}/incidentes/taller/incidentes/${idIncidente}/unidades-moviles-disponibles`,
     );
   }
 
   asignarRecursosIncidente(
     idIncidente: number,
-    body: AsignarRecursosRequest
+    body: AsignarRecursosRequest,
   ): Observable<AsignacionServicioResponse> {
     return this.http.post<AsignacionServicioResponse>(
       `${this.apiUrl}/incidentes/taller/incidentes/${idIncidente}/asignacion`,
-      body
+      body,
     );
   }
 
-  getEstadoIncidenteTaller(
-    idIncidente: number
-  ): Observable<EstadoIncidenteTallerResponse> {
+  getEstadoIncidenteTaller(idIncidente: number): Observable<EstadoIncidenteTallerResponse> {
     return this.http.get<EstadoIncidenteTallerResponse>(
-      `${this.apiUrl}/incidentes/taller/incidentes/${idIncidente}/estado`
+      `${this.apiUrl}/incidentes/taller/incidentes/${idIncidente}/estado`,
     );
   }
 
   actualizarEstadoIncidenteTaller(
     idIncidente: number,
-    body: ActualizarEstadoIncidenteRequest
+    body: ActualizarEstadoIncidenteRequest,
   ): Observable<ActualizarEstadoIncidenteResponse> {
     return this.http.patch<ActualizarEstadoIncidenteResponse>(
       `${this.apiUrl}/incidentes/taller/incidentes/${idIncidente}/estado`,
-      body
+      body,
     );
   }
 
   analizarIncidente(idIncidente: number): Observable<AnalisisIncidenteResponse> {
     return this.http.post<AnalisisIncidenteResponse>(
       `${this.apiUrl}/inteligencia/incidentes/${idIncidente}/analizar`,
-      {}
+      {},
     );
   }
 }
