@@ -26,6 +26,7 @@ import {
   ActualizarTiposVehiculoRequest,
   CrearServicioAuxilioRequest,
   ServicioAuxilioTaller,
+  TipoAuxilioCatalogo,
   TipoVehiculo,
   TiposVehiculoConfiguracionResponse,
 } from '../models/service-coverage-management.model';
@@ -99,6 +100,12 @@ export class WorkshopOperationalService {
   getServiciosAuxilioTaller(): Observable<ServicioAuxilioTaller[]> {
     return this.http.get<ServicioAuxilioTaller[]>(
       `${this.apiUrl}/operativo/taller/servicios-auxilio`
+    );
+  }
+
+  getTiposAuxilioCatalogo(): Observable<TipoAuxilioCatalogo[]> {
+    return this.http.get<TipoAuxilioCatalogo[]>(
+      `${this.apiUrl}/operativo/taller/tipos-auxilio`
     );
   }
 

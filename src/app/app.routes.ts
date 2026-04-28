@@ -66,6 +66,10 @@ export const routes: Routes = [
         component: SolicitudesDisponibles,
       },
       {
+        path: 'solicitudes/recursos',
+        component: SolicitudesDisponibles,
+      },
+      {
         path: 'historial',
         component: HistorialIncidente,
       },

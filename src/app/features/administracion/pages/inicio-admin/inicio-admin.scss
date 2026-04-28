@@ -43,10 +43,34 @@
 }
 
 .admin-card-item {
+  display: grid;
+  gap: 10px;
   padding: 22px;
   border-radius: 24px;
   background: #ffffff;
   border: 1px solid #dde8f4;
+}
+
+.card-head {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.card-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #eaf6ff;
+  color: #0f91e2;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.card-badge.is-external {
+  background: #f3f5f8;
+  color: #6a7b90;
 }
 
 .admin-card-item h3 {
@@ -60,4 +84,24 @@
   margin: 0;
   color: #5f7087;
   line-height: 1.6;
+}
+
+.card-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid #cfe0ef;
+  background: #eaf6ff;
+  color: #0f91e2;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.card-link.disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
 }

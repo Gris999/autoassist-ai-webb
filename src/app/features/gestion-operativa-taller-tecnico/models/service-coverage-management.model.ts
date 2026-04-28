@@ -33,3 +33,11 @@ export interface TiposVehiculoConfiguracionResponse {
 export interface ActualizarTiposVehiculoRequest {
   ids_tipo_vehiculo: number[];
 }
+
+export interface TipoAuxilioCatalogo {
+  id_tipo_auxilio: number;
+  nombre: string;
+  descripcion?: string | null;
+  requiere_unidad_movil: boolean;
+  requiere_remolque: boolean;
+}

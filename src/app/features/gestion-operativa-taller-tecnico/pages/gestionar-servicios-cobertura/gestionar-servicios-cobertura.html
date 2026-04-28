@@ -80,7 +80,7 @@
         <div class="section-heading">
           <div>
             <h3>Servicios de auxilio ofrecidos</h3>
-            <p>Lista, registra, ajusta precio y controla disponibilidad del catalogo propio.</p>
+            <p>Lista, registra, ajusta precio y controla disponibilidad del catalogo fijo.</p>
           </div>
         </div>
 
@@ -98,7 +98,7 @@
             <input
               type="text"
               formControlName="search"
-              placeholder="Ej. CAMBIO_LLANTA"
+              placeholder="Ej. AUXILIO_ELECTRICO"
             />
           </label>
 
@@ -136,7 +136,6 @@
                   <span class="service-chip">#{{ service.id_tipo_auxilio }}</span>
                   <div>
                     <strong>{{ service.nombre_tipo_auxilio }}</strong>
-                    <small>ID servicio {{ service.id_taller_auxilio }}</small>
                   </div>
                 </div>
 
@@ -210,7 +209,7 @@
               </h3>
               <p>
                 @if (isCreateMode()) {
-                  Registra un servicio usando `id_tipo_auxilio` porque el backend no expone el catalogo.
+                  Selecciona un tipo de auxilio del catalogo fijo y define su precio referencial.
                 } @else if (isEditMode()) {
                   Ajusta precio referencial o disponibilidad del servicio seleccionado.
                 } @else {
@@ -238,8 +237,8 @@
 
                 <div class="detail-grid">
                   <div class="detail-item">
-                    <span>ID tipo auxilio</span>
-                    <strong>{{ service.id_tipo_auxilio }}</strong>
+                    <span>Tipo de auxilio</span>
+                    <strong>{{ service.nombre_tipo_auxilio }}</strong>
                   </div>
                   <div class="detail-item">
                     <span>Precio referencial</span>
@@ -250,16 +249,15 @@
                     <strong>{{ service.disponible ? 'Disponible' : 'No disponible' }}</strong>
                   </div>
                   <div class="detail-item">
-                    <span>Registro operativo</span>
-                    <strong>#{{ service.id_taller_auxilio }}</strong>
+                    <span>Estado del registro</span>
+                    <strong>Activo en el taller</strong>
                   </div>
                 </div>
 
                 <div class="helper-card accent">
-                  <strong>Catalogo de tipos de auxilio</strong>
+                  <strong>Catalogo de auxilios estandar</strong>
                   <span>
-                    El backend actual no expone un `GET` de tipos de auxilio. Para registrar
-                    servicios nuevos, esta pantalla usa `id_tipo_auxilio` numerico con validacion.
+                    Este servicio usa un tipo de auxilio del catalogo fijo del sistema.
                   </span>
                 </div>
 
@@ -290,8 +288,15 @@
             <form class="form-grid" [formGroup]="serviceForm">
               @if (isCreateMode()) {
                 <label class="field">
-                  <span>ID tipo auxilio</span>
-                  <input type="number" min="1" formControlName="id_tipo_auxilio" />
+                  <span>Tipo de auxilio</span>
+                  <select formControlName="id_tipo_auxilio">
+                    <option [ngValue]="null">Selecciona un tipo de auxilio</option>
+                    @for (auxilio of auxilioCatalog(); track auxilio.id_tipo_auxilio) {
+                      <option [ngValue]="auxilio.id_tipo_auxilio">
+                        {{ auxilio.nombre }}
+                      </option>
+                    }
+                  </select>
                 </label>
               } @else if (selectedService(); as service) {
                 <div class="helper-card">
@@ -299,6 +304,21 @@
                   <span>
                     El backend solo permite registrar el `id_tipo_auxilio` al crear. El servicio actual usa
                     `{{ service.nombre_tipo_auxilio }}` con id `{{ service.id_tipo_auxilio }}`.
+                  </span>
+                </div>
+              }
+
+              @if (selectedAuxilioCatalogItem(); as auxilioInfo) {
+                <div class="helper-card accent">
+                  <strong>{{ auxilioInfo.nombre }}</strong>
+                  <span>{{ auxilioInfo.descripcion || 'Sin descripcion expuesta.' }}</span>
+                  <span>
+                    Requiere unidad movil:
+                    {{ auxilioInfo.requiere_unidad_movil ? 'Si' : 'No' }}
+                  </span>
+                  <span>
+                    Requiere remolque:
+                    {{ auxilioInfo.requiere_remolque ? 'Si' : 'No' }}
                   </span>
                 </div>
               }
@@ -316,10 +336,10 @@
               </div>
 
               <div class="helper-card">
-                <strong>Registro asistido</strong>
+                <strong>Registro guiado</strong>
                 <span>
-                  No existe endpoint de catalogo de tipos de auxilio. Por eso el registro se resuelve
-                  con `id_tipo_auxilio` numerico y el backend valida si ese id existe.
+                  El taller selecciona un tipo de auxilio del catalogo fijo, define precio
+                  referencial y disponibilidad.
                 </span>
               </div>
 

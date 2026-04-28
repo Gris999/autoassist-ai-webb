@@ -50,7 +50,7 @@ export class InicioTaller implements OnInit {
       return {
         kicker: 'Inicio tecnico',
         title: 'Panel del tecnico',
-        subtitle: 'Asignaciones, estado operativo y accesos por paquete.',
+        subtitle: 'Asignaciones, seguimiento operativo y trazabilidad del servicio.',
         primaryLabel: 'Ver mis asignaciones',
         primaryRoute: '/tecnico/asignaciones',
         secondaryLabel: 'Mi disponibilidad',
@@ -60,7 +60,7 @@ export class InicioTaller implements OnInit {
     return {
       kicker: 'Inicio',
       title: 'Resumen del taller',
-      subtitle: 'Solicitudes, disponibilidad y accesos rapidos.',
+      subtitle: 'Solicitudes marketplace, disponibilidad y control operativo.',
       primaryLabel: 'Ver incidentes disponibles',
       primaryRoute: '/taller/solicitudes',
       secondaryLabel: 'Ajustar disponibilidad',
@@ -123,16 +123,11 @@ export class InicioTaller implements OnInit {
     if (this.isTechnicianHome()) {
       return [
         {
-        title: 'Mi disponibilidad',
+          title: 'Mi disponibilidad',
           description: 'Consulta y actualiza tu disponibilidad real para nuevas asignaciones.',
           helper: 'Gestion Operativa',
+          route: '/tecnico',
           status: 'available',
-        },
-        {
-          title: 'Mis especialidades',
-          description: 'Mantiene visibles las capacidades tecnicas asociadas a tu perfil.',
-          helper: 'Gestion Operativa',
-          status: 'upcoming',
         },
         {
           title: 'Solicitudes asignadas',
@@ -142,22 +137,32 @@ export class InicioTaller implements OnInit {
           status: 'available',
         },
         {
-          title: 'Estado del servicio',
-          description: 'Actualiza avance, llegada y cierre cuando el caso ya este en curso.',
+          title: 'Estado operativo del servicio',
+          description: 'Visualiza estado en camino, llegada y avance desde detalle/historial.',
           helper: 'Gestion de Incidentes',
-          status: 'upcoming',
+          route: '/tecnico/asignaciones',
+          status: 'available',
         },
         {
           title: 'Ruta y monitoreo',
-          description: 'Consulta ubicacion, notificaciones e historial de servicios.',
+          description: 'Consulta ubicacion actual, ruta y trazabilidad de eventos operativos.',
           helper: 'Seguimiento',
-          status: 'upcoming',
+          route: '/tecnico/seguimiento',
+          status: 'available',
         },
         {
-          title: 'Analisis automatico',
-          description: 'Usa el resultado IA desde el detalle del incidente para orientar la atencion.',
+          title: 'Historial del incidente',
+          description: 'Revisa eventos, solicitud marketplace y confirmacion de llegada.',
+          helper: 'Seguimiento',
+          route: '/tecnico/historial',
+          status: 'available',
+        },
+        {
+          title: 'Analisis automatico (CU26)',
+          description: 'Consulta clasificacion IA, resumen y estado requiere mas informacion.',
           helper: 'Inteligencia',
-          status: 'upcoming',
+          route: '/tecnico/incidentes/11',
+          status: 'available',
         },
       ];
     }
@@ -193,17 +198,26 @@ export class InicioTaller implements OnInit {
       },
       {
         title: 'Incidentes disponibles',
-        description: 'Revisa solicitudes pendientes y entra al detalle del caso.',
+        description: 'Revisa solicitudes marketplace con puntaje y distancia, y entra al detalle.',
         helper: 'Gestion de Incidentes',
         route: '/taller/solicitudes',
         status: 'available',
       },
       {
-        title: 'Comisiones',
-        description: 'Revisa el resumen economico cuando el modulo administrativo quede activo.',
-        helper: 'Inteligencia',
-        status: 'upcoming',
+        title: 'Historial y trazabilidad',
+        description: 'Consulta linea de tiempo con ubicacion, llegada y estados operativos.',
+        helper: 'Seguimiento',
+        route: '/taller/historial',
+        status: 'available',
       },
+        {
+          title: 'CU26 y CU27 en detalle',
+          description:
+            'Visualiza problema detectado, auxilio sugerido, y seleccion inteligente por solicitud.',
+          helper: 'Inteligencia',
+          route: '/taller/solicitudes',
+          status: 'available',
+        },
     ];
   });
 

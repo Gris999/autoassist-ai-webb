@@ -42,14 +42,31 @@
           @if (activeGroup() === group.title) {
             <div class="nav-items">
               @for (item of group.items; track item.label) {
-                <a
-                  class="nav-item"
-                  [routerLink]="item.route"
-                  routerLinkActive="active"
-                  [routerLinkActiveOptions]="{ exact: true }"
-                >
-                  {{ item.label }}
-                </a>
+                @if (item.route) {
+                  <a
+                    class="nav-item"
+                    [routerLink]="item.route"
+                    routerLinkActive="active"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                  >
+                    <span>{{ item.label }}</span>
+                    @if (item.note) {
+                      <small class="item-note">{{ item.note }}</small>
+                    }
+                  </a>
+                } @else {
+                  <button
+                    class="nav-item action-item"
+                    type="button"
+                    [disabled]="item.disabled"
+                    (click)="handleAction(item.action)"
+                  >
+                    <span>{{ item.label }}</span>
+                    @if (item.note) {
+                      <small class="item-note">{{ item.note }}</small>
+                    }
+                  </button>
+                }
               }
             </div>
           }

@@ -10,6 +10,7 @@ import {
   ActualizarServicioAuxilioRequest,
   CrearServicioAuxilioRequest,
   ServicioAuxilioTaller,
+  TipoAuxilioCatalogo,
   TipoVehiculo,
   TiposVehiculoConfiguracionResponse,
 } from '../../models/service-coverage-management.model';
@@ -42,6 +43,7 @@ export class GestionarServiciosCobertura implements OnInit {
   readonly coverageError = signal('');
   readonly coverageSuccess = signal('');
   readonly services = signal<ServicioAuxilioTaller[]>([]);
+  readonly auxilioCatalog = signal<TipoAuxilioCatalogo[]>([]);
   readonly vehicleCatalog = signal<TipoVehiculo[]>([]);
   readonly vehicleConfig = signal<TiposVehiculoConfiguracionResponse | null>(null);
   readonly selectedServiceId = signal<number | null>(null);
@@ -82,6 +84,17 @@ export class GestionarServiciosCobertura implements OnInit {
   readonly selectedService = computed(() => {
     const selectedId = this.selectedServiceId();
     return this.services().find((service) => service.id_taller_auxilio === selectedId) ?? null;
+  });
+  readonly selectedAuxilioCatalogItem = computed(() => {
+    const idTipoAuxilio = this.serviceForm.controls.id_tipo_auxilio.value;
+    if (!idTipoAuxilio) {
+      return null;
+    }
+
+    return (
+      this.auxilioCatalog().find((item) => item.id_tipo_auxilio === Number(idTipoAuxilio)) ??
+      null
+    );
   });
 
   readonly filteredServices = computed(() => {
@@ -179,6 +192,7 @@ export class GestionarServiciosCobertura implements OnInit {
 
     forkJoin({
       services: this.workshopOperationalService.getServiciosAuxilioTaller(),
+      auxilioCatalog: this.workshopOperationalService.getTiposAuxilioCatalogo(),
       vehicleCatalog: this.workshopOperationalService.getTiposVehiculoCatalogo(),
       vehicleConfig: this.workshopOperationalService.getTiposVehiculoConfigurados(),
     })
@@ -192,8 +206,11 @@ export class GestionarServiciosCobertura implements OnInit {
         })
       )
       .subscribe({
-        next: ({ services, vehicleCatalog, vehicleConfig }) => {
+        next: ({ services, auxilioCatalog, vehicleCatalog, vehicleConfig }) => {
           this.services.set(this.sortServices(services));
+          this.auxilioCatalog.set(
+            [...auxilioCatalog].sort((left, right) => left.nombre.localeCompare(right.nombre))
+          );
           this.vehicleCatalog.set(vehicleCatalog);
           this.vehicleConfig.set(vehicleConfig);
           this.vehicleForm.controls.ids_tipo_vehiculo.setValue(
@@ -491,7 +508,7 @@ export class GestionarServiciosCobertura implements OnInit {
 
   private resetServiceForm(): void {
     this.serviceForm.reset({
-      id_tipo_auxilio: null,
+      id_tipo_auxilio: this.auxilioCatalog()[0]?.id_tipo_auxilio ?? null,
       precio_referencial: 0,
       disponible: true,
     });

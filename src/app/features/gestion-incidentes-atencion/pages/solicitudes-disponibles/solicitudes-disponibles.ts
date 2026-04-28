@@ -3,6 +3,8 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angula
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 import { IncidenteDisponible } from '../../models/incidente-atencion.model';
 import { IncidentesService } from '../../services/incidentes.service';
@@ -61,9 +63,17 @@ export class SolicitudesDisponibles implements OnInit, OnDestroy {
     return this.router.url.startsWith('/tecnico/seguimiento');
   }
 
+  get isResourcesView(): boolean {
+    return this.router.url.startsWith('/taller/solicitudes/recursos');
+  }
+
   get pageTitle(): string {
     if (this.isTechnicianAssignmentsView) {
       return 'Mis asignaciones';
+    }
+
+    if (this.isResourcesView) {
+      return 'Solicitudes aceptadas';
     }
 
     return this.isTechnicianView ? 'Seguimiento actual' : 'Incidentes disponibles';
@@ -72,6 +82,10 @@ export class SolicitudesDisponibles implements OnInit, OnDestroy {
   get pageSubtitle(): string {
     if (this.isTechnicianAssignmentsView) {
       return 'Incidentes asignados a tu atencion';
+    }
+
+    if (this.isResourcesView) {
+      return 'Pendientes para asignar recursos y actualizar estado del servicio';
     }
 
     return this.isTechnicianView
@@ -144,6 +158,31 @@ export class SolicitudesDisponibles implements OnInit, OnDestroy {
     return this.prioridadLabels[key] || key || 'N/D';
   }
 
+  getRequestStatusBadgeClass(status: string | null | undefined): string {
+    switch ((status ?? '').toUpperCase()) {
+      case 'PENDIENTE':
+        return 'request-badge request-badge--pending';
+      case 'ACEPTADA':
+        return 'request-badge request-badge--accepted';
+      case 'RECHAZADA':
+      case 'CANCELADA':
+        return 'request-badge request-badge--rejected';
+      default:
+        return 'request-badge';
+    }
+  }
+
+  formatDateTime(value: string | null | undefined): string {
+    if (!value) {
+      return 'No disponible';
+    }
+
+    return new Intl.DateTimeFormat('es-BO', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(new Date(value));
+  }
+
   ngOnInit(): void {
     if (this.isTechnicianAssignmentsView) {
       this.cargarAsignacionesTecnico();
@@ -152,6 +191,11 @@ export class SolicitudesDisponibles implements OnInit, OnDestroy {
 
     if (this.isTechnicianTrackingView) {
       this.cargarSeguimientoTecnico();
+      return;
+    }
+
+    if (this.isResourcesView) {
+      this.cargarSolicitudesAceptadasParaRecursos();
       return;
     }
 
@@ -210,6 +254,101 @@ export class SolicitudesDisponibles implements OnInit, OnDestroy {
         }
 
         this.loading = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  cargarSolicitudesAceptadasParaRecursos(): void {
+    this.loading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    const solicitudes = this.incidentesService.obtenerSolicitudesAceptadasLocal();
+    const acceptedFromBackend$ = this.incidentesService.getIncidentesDisponibles().pipe(
+      map((items) =>
+        (items ?? []).filter(
+          (incidente) => (incidente.estado_solicitud ?? '').toUpperCase() === 'ACEPTADA'
+        )
+      ),
+      catchError(() => of([] as IncidenteDisponible[]))
+    );
+
+    const requests = solicitudes.map((item) =>
+      this.incidentesService.getDetalleSolicitudAtencion(item.id_solicitud_taller).pipe(
+        map((detail) => {
+          if (detail.estado_solicitud !== 'ACEPTADA') {
+            this.incidentesService.quitarSolicitudAceptadaLocal(detail.id_solicitud_taller);
+            return null;
+          }
+
+          return {
+            id_solicitud_taller: detail.id_solicitud_taller,
+            id_incidente: detail.id_incidente,
+            id_taller: detail.id_taller,
+            distancia_km: detail.distancia_km,
+            puntaje_asignacion: detail.puntaje_asignacion,
+            estado_solicitud: detail.estado_solicitud,
+            fecha_envio: detail.fecha_envio,
+            fecha_respuesta: detail.fecha_respuesta,
+            titulo: detail.titulo_incidente,
+            descripcion_texto: detail.descripcion_texto,
+            direccion_referencia: detail.direccion_referencia,
+            latitud: detail.latitud,
+            longitud: detail.longitud,
+            fecha_reporte: detail.fecha_reporte,
+            id_vehiculo: 0,
+            id_tipo_incidente: detail.id_tipo_incidente,
+            tipo_incidente: detail.tipo_incidente,
+            id_prioridad: detail.id_prioridad,
+            prioridad: detail.prioridad,
+            id_estado_servicio_actual: detail.id_estado_servicio_actual,
+            estado_servicio_actual: detail.estado_servicio_actual,
+            requiere_mas_info: detail.requiere_mas_info,
+            clasificacion_ia: detail.clasificacion_ia,
+            auxilio_sugerido: detail.auxilio_sugerido,
+            confianza_clasificacion: detail.confianza_clasificacion,
+            resumen_ia: detail.resumen_ia,
+          } as IncidenteDisponible;
+        }),
+        catchError(() => {
+          this.incidentesService.quitarSolicitudAceptadaLocal(item.id_solicitud_taller);
+          return of(null);
+        })
+      )
+    );
+
+    const storedAcceptedDetails$ =
+      requests.length > 0
+        ? forkJoin(requests)
+        : of([] as Array<IncidenteDisponible | null>);
+
+    forkJoin({
+      backendAccepted: acceptedFromBackend$,
+      storedAccepted: storedAcceptedDetails$,
+    }).subscribe({
+      next: ({ backendAccepted, storedAccepted }) => {
+        const fromStored = storedAccepted.filter(
+          (item): item is IncidenteDisponible => !!item
+        );
+        const mergedMap = new Map<number, IncidenteDisponible>();
+
+        [...backendAccepted, ...fromStored].forEach((incidente) => {
+          mergedMap.set(incidente.id_incidente, incidente);
+        });
+
+        this.incidentes = Array.from(mergedMap.values());
+        this.loading = false;
+        if (this.incidentes.length === 0) {
+          this.successMessage =
+            'No hay solicitudes aceptadas vigentes. Acepta una solicitud para continuar con asignacion de recursos.';
+        }
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.loading = false;
+        this.errorMessage =
+          'No se pudo recuperar la lista de solicitudes aceptadas para asignacion.';
         this.cdr.detectChanges();
       },
     });

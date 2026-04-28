@@ -68,6 +68,7 @@ export class TallerLayout {
           shortLabel: 'GO',
           items: [
             { label: 'Inicio', route: '/tecnico' },
+            { label: 'Mi disponibilidad', route: '/tecnico' },
           ],
         },
         {
@@ -75,7 +76,7 @@ export class TallerLayout {
           shortLabel: 'IA',
           items: [
             { label: 'Mis asignaciones', route: '/tecnico/asignaciones' },
-            { label: 'Detalle del incidente', route: '/tecnico/incidentes/11' },
+            { label: 'Detalle del incidente', route: '/tecnico/incidentes/11', note: 'Desde asignaciones' },
           ],
         },
         {
@@ -90,7 +91,7 @@ export class TallerLayout {
           title: 'Inteligencia',
           shortLabel: 'IE',
           items: [
-            { label: 'Analisis IA', route: '/tecnico/incidentes/11' },
+            { label: 'Analisis IA y CU26', route: '/tecnico/incidentes/11', note: 'En detalle' },
           ],
         },
         {
@@ -127,29 +128,32 @@ export class TallerLayout {
         shortLabel: 'IA',
         items: [
           { label: 'Incidentes disponibles', route: '/taller/solicitudes' },
-          { label: 'Responder solicitud', disabled: true, note: 'Siguiente paso' },
-          { label: 'Asignar recursos', disabled: true, note: 'Siguiente paso' },
-          { label: 'Estado del servicio', disabled: true, note: 'Siguiente paso' },
+          { label: 'Responder solicitud', route: '/taller/solicitudes', note: 'En detalle de solicitud' },
+          { label: 'Asignar recursos', route: '/taller/solicitudes/recursos', note: 'Solicitudes aceptadas' },
+          { label: 'Estado del servicio', route: '/taller/solicitudes/recursos', note: 'Solicitudes aceptadas' },
         ],
       },
       {
         title: 'Seguimiento y Monitoreo del Servicio',
         shortLabel: 'SM',
         items: [
-          { label: 'Notificaciones', disabled: true, note: 'Proximamente' },
           { label: 'Historial', route: '/taller/historial' },
+          { label: 'Trazabilidad ubicacion/llegada', route: '/taller/historial', note: 'CU23/CU24' },
         ],
       },
       {
         title: 'Inteligencia y Gestion Estrategica',
         shortLabel: 'IE',
-        items: [{ label: 'Comisiones', disabled: true, note: 'Proximamente' }],
+        items: [
+          { label: 'Analisis IA del incidente', route: '/taller/solicitudes', note: 'CU26 en detalle' },
+          { label: 'Seleccion marketplace', route: '/taller/solicitudes', note: 'CU27 visible' },
+        ],
       },
       {
         title: 'Autenticacion y Seguridad',
         shortLabel: 'AS',
         items: [
-          { label: 'Perfil del taller', disabled: true, note: 'Proximamente' },
+          { label: 'Perfil del taller', route: '/taller', note: 'Resumen de acceso' },
           { label: 'Cerrar sesion', action: 'logout' },
         ],
       },

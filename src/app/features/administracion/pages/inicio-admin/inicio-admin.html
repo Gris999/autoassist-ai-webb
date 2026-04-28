@@ -13,8 +13,18 @@
   <section class="cards-grid">
     @for (card of cards; track card.title) {
       <article class="admin-card-item">
+        <div class="card-head">
+          <span class="card-badge" [class.is-external]="card.status === 'externo'">
+            {{ card.status === 'activo' ? 'Activo en web' : 'Cobertura externa' }}
+          </span>
+        </div>
         <h3>{{ card.title }}</h3>
         <p>{{ card.description }}</p>
+        @if (card.route) {
+          <a class="card-link" [routerLink]="card.route">{{ card.cta }}</a>
+        } @else {
+          <button class="card-link disabled" type="button" disabled>{{ card.cta }}</button>
+        }
       </article>
     }
   </section>

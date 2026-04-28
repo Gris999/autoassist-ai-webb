@@ -10,7 +10,10 @@ interface NavGroup {
   title: string;
   items: Array<{
     label: string;
-    route: string;
+    route?: string;
+    disabled?: boolean;
+    note?: string;
+    action?: 'logout';
   }>;
 }
 
@@ -26,71 +29,63 @@ export class AdminLayout {
   private readonly tokenService = inject(TokenService);
   private readonly router = inject(Router);
 
-  readonly activeGroup = signal('Autenticacion y Seguridad');
+  readonly activeGroup = signal('Resumen y Seguridad');
   readonly homeRoute = '/admin/inicio';
 
   readonly navGroups: NavGroup[] = [
     {
-      title: 'Autenticacion y Seguridad',
+      title: 'Resumen y Seguridad',
       items: [
+        { label: 'Inicio admin', route: '/admin/inicio' },
         { label: 'Roles de usuario', route: '/admin/roles' },
         { label: 'Bitacora del sistema', route: '/admin/bitacora' },
       ],
     },
     {
-      title: 'Gestion de Clientes',
-      items: [
-        { label: 'Clientes registrados', route: '/admin' },
-        { label: 'Vehiculos registrados', route: '/admin' },
-        { label: 'Pagos', route: '/admin' },
-        { label: 'Calificaciones', route: '/admin' },
-      ],
-    },
-    {
-      title: 'Gestion Operativa de Taller y Tecnico',
-      items: [
-        { label: 'Talleres registrados', route: '/admin' },
-        { label: 'Tecnicos registrados', route: '/admin' },
-        { label: 'Servicios ofrecidos', route: '/admin' },
-        { label: 'Tipos de vehiculo atendidos', route: '/admin' },
-        { label: 'Disponibilidad de talleres', route: '/admin' },
-        { label: 'Disponibilidad de tecnicos', route: '/admin' },
-        { label: 'Unidades moviles', route: '/admin' },
-      ],
-    },
-    {
-      title: 'Gestion de Incidentes y Atencion',
-      items: [
-        { label: 'Incidentes reportados', route: '/admin' },
-        { label: 'Incidentes disponibles', route: '/admin' },
-        { label: 'Solicitudes', route: '/admin' },
-        { label: 'Asignaciones', route: '/admin' },
-        { label: 'Estado del servicio', route: '/admin' },
-        { label: 'Incidentes asignados', route: '/admin' },
-      ],
-    },
-    {
       title: 'Seguimiento y Monitoreo del Servicio',
       items: [
-        { label: 'Estado de servicios', route: '/admin' },
-        { label: 'Asignaciones de auxilio', route: '/admin' },
-        { label: 'Notificaciones enviadas', route: '/admin' },
         { label: 'Historial de incidentes', route: '/admin/historial-incidentes' },
-        { label: 'Ubicaciones registradas', route: '/admin' },
-        { label: 'Llegadas al incidente', route: '/admin' },
+        { label: 'Trazabilidad de ubicacion/llegada', route: '/admin/historial-incidentes' },
       ],
     },
     {
       title: 'Inteligencia y Gestion Estrategica',
       items: [
-        { label: 'Analisis IA', route: '/admin' },
-        { label: 'Informacion adicional solicitada', route: '/admin' },
-        { label: 'Asignaciones inteligentes', route: '/admin' },
         { label: 'Metricas de incidentes', route: '/admin/metricas-incidentes' },
         { label: 'Comisiones', route: '/admin/comisiones' },
+        {
+          label: 'CU26 mas informacion / CU27 seleccion',
+          route: '/admin/historial-incidentes',
+          note: 'Visible en historial y detalle',
+        },
+      ],
+    },
+    {
+      title: 'Cobertura actual del panel web',
+      items: [
+        {
+          label: 'Gestion de clientes en web admin',
+          disabled: true,
+          note: 'Se opera desde otros frontends',
+        },
+        {
+          label: 'Gestion operativa taller/tecnico',
+          disabled: true,
+          note: 'Se opera desde panel taller',
+        },
+        {
+          label: 'Cerrar sesion',
+          action: 'logout',
+        },
       ],
     },
   ];
+
+  handleAction(action?: 'logout'): void {
+    if (action === 'logout') {
+      this.logout();
+    }
+  }
 
   toggleGroup(groupTitle: string): void {
     this.activeGroup.update((current) =>

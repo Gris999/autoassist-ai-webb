@@ -21,6 +21,9 @@ export interface HistorialIncidenteEvento {
   nombre_tecnico?: string | null;
   id_unidad_movil?: number | null;
   placa_unidad_movil?: string | null;
+  latitud_actual?: number | string | null;
+  longitud_actual?: number | string | null;
+  fecha_actualizacion?: string | null;
 }
 
 export interface IncidenteHistorialDetail {
@@ -35,6 +38,8 @@ export interface IncidenteHistorialDetail {
   direccion_referencia?: string | null;
   latitud?: number | string | null;
   longitud?: number | string | null;
+  clasificacion_ia?: string | null;
+  auxilio_sugerido?: string | null;
   historial: HistorialIncidenteEvento[];
   mensaje?: string | null;
 }

@@ -238,6 +238,15 @@
   color: #8c5d00;
 }
 
+.cu26-alert {
+  margin-top: -6px;
+}
+
+.cu26-alert strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
 .field-grid,
 .form-grid {
   display: grid;
@@ -464,6 +473,11 @@
 .badge--priority-low {
   background: #eef8ff;
   color: #0f91e2;
+}
+
+.badge--marketplace {
+  background: #ebf0ff;
+  color: #295ed6;
 }
 
 @media (max-width: 1180px) {

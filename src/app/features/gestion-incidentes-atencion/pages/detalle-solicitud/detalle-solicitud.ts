@@ -87,6 +87,8 @@ export class DetalleSolicitud implements OnInit {
   readonly tecnicos = signal<TecnicoDisponible[]>([]);
   readonly unidadesMoviles = signal<UnidadMovilDisponible[]>([]);
   readonly detailSourceMismatch = signal(false);
+  readonly analysisLoading = signal(false);
+  readonly analysisError = signal('');
 
   readonly assignmentForm = this.fb.group({
     id_tecnico: [null as number | null, Validators.required],
@@ -161,6 +163,38 @@ export class DetalleSolicitud implements OnInit {
       ? `${unidad.placa} - ${unidad.tipo_unidad}`
       : `Unidad #${summary.id_unidad_movil}`;
   });
+  readonly requiresMoreInfo = computed(() => {
+    const data = this.displayData();
+    return !!(data?.requiere_mas_info ?? false);
+  });
+  readonly analysisPending = computed(() => {
+    const current = this.displayData();
+    if (!current) {
+      return false;
+    }
+
+    return this.requiresMoreInfo() || !current.clasificacion_ia;
+  });
+  readonly operationalStageLabel = computed(() => {
+    const status = (this.displayData()?.estado_servicio_actual ?? '').toUpperCase();
+    switch (status) {
+      case 'ASIGNADO':
+        return 'Tecnico asignado';
+      case 'EN_CAMINO':
+        return 'Tecnico en camino';
+      case 'EN_PROCESO':
+      case 'EN_ATENCION':
+        return 'Tecnico en sitio';
+      case 'FINALIZADO':
+        return 'Servicio finalizado';
+      default:
+        return 'Pendiente operativo';
+    }
+  });
+  readonly reachedSite = computed(() => {
+    const status = (this.displayData()?.estado_servicio_actual ?? '').toUpperCase();
+    return status === 'EN_PROCESO' || status === 'EN_ATENCION' || status === 'FINALIZADO';
+  });
 
   ngOnInit(): void {
     const previewState = history.state?.incidentePreview as IncidenteDisponible | undefined;
@@ -223,6 +257,8 @@ export class DetalleSolicitud implements OnInit {
             this.unidadesMoviles.set([]);
             this.currentServiceState.set(null);
           }
+
+          this.loadIncidentAnalysis(detail.id_incidente);
         },
         error: (error) => {
           const preview = this.previewIncident();
@@ -463,6 +499,10 @@ export class DetalleSolicitud implements OnInit {
           this.confirmRejectOpen.set(false);
 
           if (response.accion === 'aceptar') {
+            this.incidentesService.guardarSolicitudAceptada(
+              response.id_solicitud_taller,
+              response.id_incidente
+            );
             this.responseSuccess.set(
               'Solicitud aceptada correctamente. Ahora puedes asignar tecnico y unidad movil.'
             );
@@ -471,6 +511,9 @@ export class DetalleSolicitud implements OnInit {
             this.loadAssignmentOptions(response.id_incidente);
             this.loadCurrentState(response.id_incidente);
           } else {
+            this.incidentesService.quitarSolicitudAceptadaLocal(
+              response.id_solicitud_taller
+            );
             this.responseSuccess.set('Solicitud rechazada correctamente.');
             this.assignmentLocked.set(true);
             this.tecnicos.set([]);
@@ -618,6 +661,7 @@ export class DetalleSolicitud implements OnInit {
       id_estado_servicio_actual: 2,
       estado_servicio_actual: 'ASIGNADO',
     });
+    this.loadIncidentAnalysis(idIncidente);
     this.loading.set(false);
   }
 
@@ -633,8 +677,8 @@ export class DetalleSolicitud implements OnInit {
       id_incidente: preview.id_incidente,
       id_taller: 0,
       distancia_km: null,
-      puntaje_asignacion: null,
-      estado_solicitud: 'PENDIENTE',
+      puntaje_asignacion: preview.puntaje_asignacion ?? null,
+      estado_solicitud: preview.estado_solicitud ?? 'PENDIENTE',
       fecha_envio: preview.fecha_reporte,
       fecha_respuesta: null,
       titulo_incidente: preview.titulo,
@@ -649,6 +693,42 @@ export class DetalleSolicitud implements OnInit {
       prioridad: preview.prioridad,
       id_estado_servicio_actual: preview.id_estado_servicio_actual,
       estado_servicio_actual: preview.estado_servicio_actual,
+      requiere_mas_info: preview.requiere_mas_info ?? null,
+      clasificacion_ia: preview.clasificacion_ia ?? null,
+      confianza_clasificacion: preview.confianza_clasificacion ?? null,
+      resumen_ia: preview.resumen_ia ?? null,
+      auxilio_sugerido: preview.auxilio_sugerido ?? null,
     };
+  }
+
+  private loadIncidentAnalysis(idIncidente: number): void {
+    this.analysisLoading.set(true);
+    this.analysisError.set('');
+
+    this.incidentesService
+      .analizarIncidente(idIncidente)
+      .pipe(finalize(() => this.analysisLoading.set(false)))
+      .subscribe({
+        next: (analysis) => {
+          const current = this.detail();
+          if (!current) {
+            return;
+          }
+
+          this.detail.set({
+            ...current,
+            requiere_mas_info: analysis.requiere_mas_info,
+            clasificacion_ia: analysis.clasificacion_ia,
+            confianza_clasificacion: analysis.confianza_clasificacion,
+            resumen_ia: analysis.resumen_ia,
+            auxilio_sugerido: analysis.auxilio_sugerido ?? null,
+          });
+        },
+        error: () => {
+          this.analysisError.set(
+            'No fue posible consultar el analisis inteligente para este incidente.'
+          );
+        },
+      });
   }
 }

@@ -239,6 +239,74 @@
             </article>
           </div>
 
+          <div class="detail-grid">
+            <article class="detail-item detail-item--full">
+              <small>Flujo marketplace</small>
+              <strong>Solicitud enviada por seleccion automatica a talleres compatibles</strong>
+              <p>
+                El incidente se distribuye por solicitud, no por asignacion directa inicial.
+              </p>
+            </article>
+            <article class="detail-item">
+              <small>Problema identificado</small>
+              <strong>{{ detail.clasificacion_ia || 'No disponible' }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Auxilio requerido</small>
+              <strong>{{ detail.auxilio_sugerido || 'No disponible' }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Taller que acepto</small>
+              <strong>
+                {{
+                  acceptedWorkshop()?.nombre_taller ||
+                  acceptedWorkshop()?.id_taller ||
+                  'Sin aceptacion registrada'
+                }}
+              </strong>
+            </article>
+            <article class="detail-item">
+              <small>Solicitudes marketplace visibles</small>
+              <strong>{{ marketplaceEvents().length }}</strong>
+            </article>
+          </div>
+
+          <div class="detail-grid">
+            <article class="detail-item">
+              <small>Estado operativo tecnico</small>
+              <strong>{{ detail.estado_servicio_actual }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Llegada al incidente</small>
+              <strong>
+                {{
+                  arrivalEvent()
+                    ? 'Llegada registrada. Tecnico en sitio.'
+                    : 'Pendiente de llegada'
+                }}
+              </strong>
+            </article>
+            <article class="detail-item detail-item--full">
+              <small>Ubicacion actual del tecnico</small>
+              <strong>
+                {{
+                  formatCoordinates(
+                    lastTrackingEvent()?.latitud_actual,
+                    lastTrackingEvent()?.longitud_actual
+                  )
+                }}
+              </strong>
+              <p>
+                Ultimo evento:
+                {{
+                  lastTrackingEvent()
+                    ? (lastTrackingEvent()!.tipo_evento + ' - ' + formatDateTime(lastTrackingEvent()!.fecha_hora))
+                    : 'Sin eventos de seguimiento disponibles'
+                }}
+              </p>
+            </article>
+          </div>
+
           @if (filteredHistoryEvents().length === 0) {
             <div class="empty-card">
               <strong>Historial sin eventos visibles</strong>

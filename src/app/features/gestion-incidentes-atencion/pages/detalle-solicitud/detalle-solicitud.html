@@ -67,6 +67,7 @@
 
       <div class="hero-badges">
         <div class="badge-group">
+          <span class="badge badge--marketplace">Solicitud por seleccion automatica</span>
           <span class="{{ getStatusBadgeClass(data.estado_solicitud) }}">
             {{ data.estado_solicitud }}
           </span>
@@ -78,6 +79,16 @@
           </span>
         </div>
       </div>
+
+      @if (requiresMoreInfo()) {
+        <div class="feedback-box warning cu26-alert">
+          <strong>Requiere mas informacion</strong>
+          <p>
+            El sistema detecto que aun falta informacion para procesar completamente este
+            incidente.
+          </p>
+        </div>
+      }
 
       <div class="hero-meta">
         <div>
@@ -143,6 +154,10 @@
               <strong>Estado de solicitud</strong>
               <span>{{ data.estado_solicitud }}</span>
             </article>
+            <article class="info-item">
+              <strong>Solicitud marketplace</strong>
+              <span>Solicitud recibida por seleccion automatica</span>
+            </article>
             <article class="info-item info-item--full">
               <strong>Descripcion</strong>
               <span>{{ data.descripcion_texto || 'Sin descripcion registrada.' }}</span>
@@ -160,6 +175,60 @@
               <span>{{ data.longitud || 'No disponible' }}</span>
             </article>
           </div>
+
+          <div class="info-list">
+            <article class="info-item info-item--full">
+              <strong>Analisis inteligente del incidente</strong>
+              <span>
+                {{
+                  analysisPending()
+                    ? 'Analisis pendiente o incompleto para asignacion normal.'
+                    : 'Analisis disponible para la decision operativa.'
+                }}
+              </span>
+            </article>
+            <article class="info-item">
+              <strong>Problema detectado</strong>
+              <span>{{ data.clasificacion_ia || 'No disponible' }}</span>
+            </article>
+            <article class="info-item">
+              <strong>Auxilio sugerido</strong>
+              <span>{{ data.auxilio_sugerido || 'No disponible' }}</span>
+            </article>
+            <article class="info-item">
+              <strong>Confianza de clasificacion</strong>
+              <span>
+                {{
+                  data.confianza_clasificacion !== null &&
+                  data.confianza_clasificacion !== undefined
+                    ? (data.confianza_clasificacion | number : '1.0-2')
+                    : 'No disponible'
+                }}
+              </span>
+            </article>
+            <article class="info-item info-item--full">
+              <strong>Resumen IA</strong>
+              <span>{{ data.resumen_ia || 'No disponible' }}</span>
+            </article>
+            <article class="info-item info-item--full">
+              <strong>Estado de seleccion marketplace</strong>
+              <span>
+                {{
+                  data.estado_solicitud === 'PENDIENTE'
+                    ? 'Buscando talleres compatibles'
+                    : 'Solicitud generada por seleccion automatica'
+                }}
+              </span>
+            </article>
+          </div>
+
+          @if (analysisLoading()) {
+            <div class="feedback-box">Consultando analisis inteligente...</div>
+          }
+
+          @if (analysisError()) {
+            <div class="feedback-box warning">{{ analysisError() }}</div>
+          }
         </section>
 
         @if (!isTechnicianView()) {
@@ -456,6 +525,35 @@
                   data.puntaje_asignacion !== null && data.puntaje_asignacion !== undefined
                     ? (data.puntaje_asignacion | number : '1.0-1')
                     : 'No disponible'
+                }}
+              </span>
+            </article>
+            <article class="info-item info-item--full">
+              <strong>Proceso marketplace</strong>
+              <span>
+                Este incidente fue enviado como solicitud al taller. No fue asignado
+                directamente al inicio.
+              </span>
+            </article>
+            <article class="info-item">
+              <strong>Problema identificado</strong>
+              <span>{{ data.clasificacion_ia || 'No disponible' }}</span>
+            </article>
+            <article class="info-item">
+              <strong>Auxilio requerido</strong>
+              <span>{{ data.auxilio_sugerido || 'No disponible' }}</span>
+            </article>
+            <article class="info-item">
+              <strong>Estado operativo del tecnico</strong>
+              <span>{{ operationalStageLabel() }}</span>
+            </article>
+            <article class="info-item">
+              <strong>Llegada al incidente</strong>
+              <span>
+                {{
+                  reachedSite()
+                    ? 'Llegada registrada. Tecnico en sitio.'
+                    : 'Pendiente de llegada'
                 }}
               </span>
             </article>

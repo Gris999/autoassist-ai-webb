@@ -20,6 +20,11 @@ export interface IncidenteDisponible {
   prioridad: string;
   id_estado_servicio_actual: number;
   estado_servicio_actual: string;
+  requiere_mas_info?: boolean | null;
+  clasificacion_ia?: string | null;
+  auxilio_sugerido?: string | null;
+  confianza_clasificacion?: number | null;
+  resumen_ia?: string | null;
 }
 
 export interface SolicitudAtencionDetalle {
@@ -43,6 +48,11 @@ export interface SolicitudAtencionDetalle {
   prioridad: string;
   id_estado_servicio_actual: number;
   estado_servicio_actual: string;
+  requiere_mas_info?: boolean | null;
+  clasificacion_ia?: string | null;
+  auxilio_sugerido?: string | null;
+  confianza_clasificacion?: number | null;
+  resumen_ia?: string | null;
 }
 
 export interface ResponderSolicitudRequest {

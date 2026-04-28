@@ -168,6 +168,51 @@ export class HistorialIncidente implements OnInit {
 
     return Array.from(new Set(detail.historial.map((entry) => entry.tipo_evento)));
   });
+  readonly marketplaceEvents = computed(() => {
+    return this.filteredHistoryEvents().filter((entry) => {
+      const eventType = entry.tipo_evento.toUpperCase();
+      return (
+        eventType.includes('SOLICITUD') ||
+        eventType.includes('TALLER') ||
+        !!entry.estado_solicitud ||
+        !!entry.nombre_taller
+      );
+    });
+  });
+  readonly acceptedWorkshop = computed(() => {
+    return this.marketplaceEvents().find(
+      (entry) => (entry.estado_solicitud ?? '').toUpperCase() === 'ACEPTADA'
+    );
+  });
+  readonly lastTrackingEvent = computed(() => {
+    const events = this.filteredHistoryEvents();
+    for (let index = events.length - 1; index >= 0; index -= 1) {
+      const event = events[index];
+      const eventType = event.tipo_evento.toUpperCase();
+      if (
+        eventType.includes('UBICACION') ||
+        eventType.includes('EN_CAMINO') ||
+        eventType.includes('LLEGADA') ||
+        eventType.includes('CAMBIO_ESTADO') ||
+        !!event.latitud_actual ||
+        !!event.longitud_actual
+      ) {
+        return event;
+      }
+    }
+    return null;
+  });
+  readonly arrivalEvent = computed(() => {
+    return this.filteredHistoryEvents().find((entry) => {
+      const eventType = entry.tipo_evento.toUpperCase();
+      const nextStatus = (entry.estado_nuevo ?? '').toUpperCase();
+      return (
+        eventType.includes('LLEGADA') ||
+        nextStatus === 'EN_PROCESO' ||
+        nextStatus === 'EN_ATENCION'
+      );
+    });
+  });
 
   ngOnInit(): void {
     this.loadHistoryList();
@@ -289,6 +334,17 @@ export class HistorialIncidente implements OnInit {
     ].filter(Boolean);
 
     return parts.join(' · ') || 'Sin actores operativos vinculados.';
+  }
+
+  formatCoordinates(
+    lat: number | string | null | undefined,
+    lon: number | string | null | undefined
+  ): string {
+    if (lat === null || lat === undefined || lon === null || lon === undefined) {
+      return 'No disponible';
+    }
+
+    return `${lat}, ${lon}`;
   }
 
   clearEventFilters(): void {

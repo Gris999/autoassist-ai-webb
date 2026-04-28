@@ -4,7 +4,12 @@
       <h1>{{ pageTitle }}</h1>
       <p>{{ pageSubtitle }}</p>
     </div>
-    <button type="button" (click)="cargarIncidentes()">Actualizar</button>
+    <button
+      type="button"
+      (click)="isResourcesView ? cargarSolicitudesAceptadasParaRecursos() : cargarIncidentes()"
+    >
+      Actualizar
+    </button>
   </div>
 
   @if (isTechnicianTrackingView) {
@@ -155,6 +160,44 @@
             <div class="card-meta">
               <span>#{{ incidente.id_incidente || 'N/D' }}</span>
               <span>Estado {{ incidente.estado_servicio_actual || 'N/D' }}</span>
+            </div>
+
+            <div class="marketplace-copy">
+              <strong>Solicitud recibida por seleccion automatica</strong>
+              <span>
+                Estado de la solicitud:
+                <span [class]="getRequestStatusBadgeClass(incidente.estado_solicitud)">
+                  {{ incidente.estado_solicitud || 'No disponible' }}
+                </span>
+              </span>
+              <span>
+                Fecha de envio: {{ formatDateTime(incidente.fecha_envio) }}
+              </span>
+              <span>
+                Distancia estimada:
+                {{
+                  incidente.distancia_km !== null && incidente.distancia_km !== undefined
+                    ? (incidente.distancia_km | number : '1.1-1') + ' km'
+                    : 'No disponible'
+                }}
+              </span>
+              <span>
+                Puntaje de compatibilidad:
+                {{
+                  incidente.puntaje_asignacion !== null &&
+                  incidente.puntaje_asignacion !== undefined
+                    ? (incidente.puntaje_asignacion | number : '1.0-2')
+                    : 'No disponible'
+                }}
+              </span>
+              <span>
+                Problema detectado por IA:
+                {{ incidente.clasificacion_ia || 'No disponible' }}
+              </span>
+              <span>
+                Tipo de auxilio requerido:
+                {{ incidente.auxilio_sugerido || 'No disponible' }}
+              </span>
             </div>
 
             <p>{{ incidente.descripcion_texto || 'Sin descripcion' }}</p>
