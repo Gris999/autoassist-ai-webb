@@ -1,0 +1,288 @@
+<div class="history-page">
+  <header class="hero-card history-hero">
+    <div class="hero-copy">
+      <p class="hero-kicker">{{ panelKicker() }}</p>
+      <h2>Historial del incidente</h2>
+      <p>
+        Revisa la trazabilidad completa: estados, asignaciones y eventos cronologicos del servicio.
+      </p>
+
+      <div class="hero-actions">
+        <button type="button" class="primary-button" (click)="loadHistoryList()">
+          Actualizar historial
+        </button>
+        <button type="button" class="secondary-button" disabled>
+          Exportar PDF
+        </button>
+      </div>
+    </div>
+
+    <article class="hero-note">
+      <span class="hero-note__label">Incidente seleccionado</span>
+      @if (selectedIncident(); as incident) {
+        <strong>{{ formatIncidentCode(incident.id_incidente) }}</strong>
+        <p>{{ incident.titulo }}</p>
+        <small>Estado actual: {{ incident.estado_servicio_actual }}</small>
+      } @else {
+        <strong>Sin seleccion</strong>
+        <p>Selecciona un incidente del listado para ver la secuencia completa.</p>
+      }
+    </article>
+  </header>
+
+  @if (errorMessage()) {
+    <div class="feedback-box error">{{ errorMessage() }}</div>
+  }
+
+  <form class="filters-bar" [formGroup]="filterForm">
+    <span class="filter-label">Filtros</span>
+
+    <label class="filter-field">
+      <input
+        type="search"
+        formControlName="search"
+        placeholder="Buscar incidente"
+      />
+    </label>
+
+    <label class="filter-field">
+      <select formControlName="estado">
+        <option value="todos">Estado: Todos</option>
+        <option value="en_camino">Estado: En camino</option>
+        <option value="asignado">Estado: Asignado</option>
+        <option value="finalizado">Estado: Finalizado</option>
+        <option value="cancelado">Estado: Cancelado</option>
+      </select>
+    </label>
+
+    <label class="filter-field">
+      <select formControlName="actor">
+        <option value="todos">Actor: Todos</option>
+        @for (actor of availableActors(); track actor) {
+          <option [value]="actor">{{ actor }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="filter-field">
+      <select formControlName="evento">
+        <option value="todos">Evento: Todos</option>
+        @for (eventType of availableEventTypes(); track eventType) {
+          <option [value]="eventType">{{ eventType }}</option>
+        }
+      </select>
+    </label>
+
+    <button type="button" class="secondary-button" (click)="clearEventFilters()">
+      Limpiar
+    </button>
+  </form>
+
+  <section class="stats-grid">
+    <article class="stat-card">
+      <span class="stat-pill">Eventos registrados</span>
+      <strong>{{ totalEventos() }}</strong>
+      <p>Eventos visibles dentro del historial actual.</p>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-pill">Cambios de estado</span>
+      <strong>{{ totalCambiosEstado() }}</strong>
+      <p>Actualizaciones de estado detectadas en la secuencia.</p>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-pill">Asignaciones</span>
+      <strong>{{ totalAsignaciones() }}</strong>
+      <p>Registros operativos de taller, tecnico o unidad movil.</p>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-pill">Tiempo transcurrido</span>
+      <strong>{{ tiempoTranscurridoLabel() }}</strong>
+      <p>Desde el reporte inicial hasta el ultimo evento visible.</p>
+    </article>
+  </section>
+
+  <div class="history-layout">
+    <section class="content-card">
+      <div class="section-heading">
+        <div>
+          <span class="section-pill">Incidentes disponibles</span>
+          <h3>Listado visible segun tu acceso</h3>
+          <p>Selecciona un incidente para abrir su historial completo.</p>
+        </div>
+      </div>
+
+      @if (loadingList()) {
+        <div class="empty-card">
+          <strong>Cargando historial disponible...</strong>
+          <p>Estamos consultando los incidentes visibles para este usuario.</p>
+        </div>
+      } @else if (incidents().length === 0) {
+        <div class="empty-card">
+          <strong>Sin incidentes para consultar</strong>
+          <p>No hay historial de incidentes disponible para este usuario.</p>
+        </div>
+      } @else if (filteredIncidents().length === 0) {
+        <div class="empty-card">
+          <strong>Sin coincidencias</strong>
+          <p>Prueba con otros filtros para ubicar un incidente.</p>
+        </div>
+      } @else {
+        <div class="table-wrap">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Codigo</th>
+                <th>Titulo</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+                <th>Accion</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (incident of filteredIncidents(); track incident.id_incidente) {
+                <tr [class.is-selected]="selectedIncidentId() === incident.id_incidente">
+                  <td>{{ formatIncidentCode(incident.id_incidente) }}</td>
+                  <td>
+                    <div class="incident-copy">
+                      <strong>{{ incident.titulo }}</strong>
+                      <small>{{ formatDateTime(incident.fecha_reporte) }}</small>
+                    </div>
+                  </td>
+                  <td>{{ incident.tipo_incidente }}</td>
+                  <td>
+                    <span [class]="getStatusBadgeClass(incident.estado_servicio_actual)">
+                      {{ incident.estado_servicio_actual }}
+                    </span>
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      class="table-link"
+                      (click)="selectIncident(incident.id_incidente)"
+                    >
+                      Ver historial
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <div class="footer-note">
+        <strong>Acciones disponibles</strong>
+        <p>Consultar detalle · Revisar asignaciones · Visualizar cambios de estado.</p>
+      </div>
+    </section>
+
+    <div class="side-stack">
+      <section class="content-card">
+        <div class="section-heading">
+          <div>
+            <span class="section-pill">Secuencia del historial</span>
+            <h3>{{ selectedIncident()?.titulo || 'Selecciona un incidente' }}</h3>
+            <p>
+              {{
+                selectedIncident()
+                  ? formatIncidentCode(selectedIncident()!.id_incidente)
+                  : 'Aun no hay un detalle cargado.'
+              }}
+            </p>
+          </div>
+        </div>
+
+        @if (loadingDetail()) {
+          <div class="empty-card">
+            <strong>Cargando detalle...</strong>
+            <p>Estamos consultando la trazabilidad del incidente seleccionado.</p>
+          </div>
+        } @else if (detailErrorMessage()) {
+          <div class="feedback-box error">{{ detailErrorMessage() }}</div>
+        } @else if (selectedIncident(); as detail) {
+          <div class="detail-grid">
+            <article class="detail-item">
+              <small>Prioridad</small>
+              <strong>{{ detail.prioridad }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Tipo</small>
+              <strong>{{ detail.tipo_incidente }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Estado actual</small>
+              <strong>{{ detail.estado_servicio_actual }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Fecha reporte</small>
+              <strong>{{ formatDateTime(detail.fecha_reporte) }}</strong>
+            </article>
+            <article class="detail-item detail-item--full">
+              <small>Descripcion</small>
+              <strong>{{ detail.descripcion_texto || 'Sin descripcion registrada.' }}</strong>
+            </article>
+            <article class="detail-item detail-item--full">
+              <small>Direccion</small>
+              <strong>{{ detail.direccion_referencia || 'No disponible' }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Latitud</small>
+              <strong>{{ detail.latitud ?? 'No disponible' }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Longitud</small>
+              <strong>{{ detail.longitud ?? 'No disponible' }}</strong>
+            </article>
+          </div>
+
+          @if (filteredHistoryEvents().length === 0) {
+            <div class="empty-card">
+              <strong>Historial sin eventos visibles</strong>
+              <p>{{ detail.mensaje || 'No existen eventos para mostrar con los filtros actuales.' }}</p>
+            </div>
+          } @else {
+            <div class="timeline">
+              @for (entry of filteredHistoryEvents(); track entry.fecha_hora + entry.tipo_evento + ($index + '')) {
+                <article class="timeline-item">
+                  <div [class]="getEventToneClass(entry)"></div>
+                  <div class="timeline-content">
+                    <div class="timeline-head">
+                      <strong>{{ entry.tipo_evento }}</strong>
+                      <small>{{ formatDateTime(entry.fecha_hora) }}</small>
+                    </div>
+
+                    <p class="timeline-detail">{{ entry.detalle || 'Sin detalle adicional.' }}</p>
+
+                    <div class="timeline-meta">
+                      <span><strong>Actor:</strong> {{ entry.actor || 'Sistema' }}</span>
+                      @if (entry.estado_anterior || entry.estado_nuevo) {
+                        <span>
+                          <strong>Estado:</strong>
+                          {{ entry.estado_anterior || 'N/D' }} → {{ entry.estado_nuevo || 'N/D' }}
+                        </span>
+                      }
+                      @if (entry.estado_solicitud) {
+                        <span><strong>Solicitud:</strong> {{ entry.estado_solicitud }}</span>
+                      }
+                    </div>
+
+                    <p class="timeline-support">{{ getEventSummary(entry) }}</p>
+                  </div>
+                </article>
+              }
+            </div>
+          }
+        } @else {
+          <div class="empty-card">
+            <strong>Selecciona un incidente</strong>
+            <p>Elige una fila del listado para ver la secuencia cronologica del historial.</p>
+          </div>
+        }
+      </section>
+    </div>
+  </div>
+</div>

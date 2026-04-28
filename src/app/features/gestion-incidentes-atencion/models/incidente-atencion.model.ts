@@ -1,10 +1,17 @@
 export interface IncidenteDisponible {
+  id_solicitud_taller?: number | null;
   id_incidente: number;
+  id_taller?: number | null;
+  distancia_km?: number | null;
+  puntaje_asignacion?: number | null;
+  estado_solicitud?: string | null;
+  fecha_envio?: string | null;
+  fecha_respuesta?: string | null;
   titulo: string;
   descripcion_texto?: string | null;
   direccion_referencia?: string | null;
-  latitud?: string | null;
-  longitud?: string | null;
+  latitud?: string | number | null;
+  longitud?: string | number | null;
   fecha_reporte: string;
   id_vehiculo: number;
   id_tipo_incidente: number;
@@ -13,7 +20,6 @@ export interface IncidenteDisponible {
   prioridad: string;
   id_estado_servicio_actual: number;
   estado_servicio_actual: string;
-  id_solicitud_taller?: number | null;
 }
 
 export interface SolicitudAtencionDetalle {
@@ -28,8 +34,8 @@ export interface SolicitudAtencionDetalle {
   titulo_incidente: string;
   descripcion_texto?: string | null;
   direccion_referencia?: string | null;
-  latitud?: string | null;
-  longitud?: string | null;
+  latitud?: string | number | null;
+  longitud?: string | number | null;
   fecha_reporte: string;
   id_tipo_incidente: number;
   tipo_incidente: string;

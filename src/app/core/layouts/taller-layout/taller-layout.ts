@@ -83,6 +83,7 @@ export class TallerLayout {
           shortLabel: 'SM',
           items: [
             { label: 'Seguimiento actual', route: '/tecnico/seguimiento' },
+            { label: 'Historial del incidente', route: '/tecnico/historial' },
           ],
         },
         {
@@ -136,7 +137,7 @@ export class TallerLayout {
         shortLabel: 'SM',
         items: [
           { label: 'Notificaciones', disabled: true, note: 'Proximamente' },
-          { label: 'Historial', disabled: true, note: 'Proximamente' },
+          { label: 'Historial', route: '/taller/historial' },
         ],
       },
       {

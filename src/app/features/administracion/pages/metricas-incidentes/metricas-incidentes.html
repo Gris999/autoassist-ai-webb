@@ -1,0 +1,355 @@
+<div class="metrics-page">
+  <header class="hero-card metrics-hero">
+    <div class="hero-copy">
+      <p class="hero-kicker">Inteligencia y gestion estrategica</p>
+      <h2>Consulta metricas del incidente desde una vista administrativa</h2>
+      <p>
+        El sistema procesa los datos acumulados de atencion y te permite revisar
+        indicadores operativos, tiempos clave y comportamiento del flujo por incidente.
+      </p>
+
+      <div class="hero-actions">
+        <button type="button" class="primary-button" (click)="loadMetrics()">
+          Actualizar metricas
+        </button>
+        <button type="button" class="secondary-button" disabled>
+          Exportar PDF
+        </button>
+      </div>
+    </div>
+
+    <article class="hero-note">
+      <span class="hero-note__label">Ultima generacion</span>
+      <strong>{{ formatDateTime(ultimaGeneracion()) }}</strong>
+      <p>
+        {{
+          totalIncidentes() > 0
+            ? totalIncidentes() + ' incidentes procesados con lectura operativa acumulada.'
+            : 'Sin incidentes metricados por el momento.'
+        }}
+      </p>
+    </article>
+  </header>
+
+  @if (errorMessage()) {
+    <div class="feedback-box error">{{ errorMessage() }}</div>
+  }
+
+  @if (successMessage()) {
+    <div class="feedback-box success">{{ successMessage() }}</div>
+  }
+
+  <form class="filters-bar" [formGroup]="filterForm">
+    <span class="filter-tag filter-tag--label">Filtros</span>
+
+    <label class="filter-field filter-field--search">
+      <input
+        type="search"
+        formControlName="search"
+        placeholder="Buscar por titulo, estado, rendimiento o id..."
+      />
+    </label>
+
+    <label class="filter-field">
+      <select formControlName="estado">
+        <option value="todos">Estado: Todos</option>
+        <option value="finalizado">Estado: Finalizado</option>
+        <option value="reportado">Estado: Reportado</option>
+        <option value="en_camino">Estado: En camino</option>
+        <option value="en_proceso">Estado: En proceso</option>
+      </select>
+    </label>
+
+    <label class="filter-field">
+      <select formControlName="rendimiento">
+        <option value="todos">Rendimiento: Todos</option>
+        <option value="alto">Rendimiento: Alto</option>
+        <option value="medio">Rendimiento: Medio</option>
+        <option value="bajo">Rendimiento: Bajo</option>
+        <option value="sin_datos">Rendimiento: Sin datos</option>
+      </select>
+    </label>
+
+    <button type="button" class="secondary-button" (click)="clearFilters()">
+      Limpiar
+    </button>
+  </form>
+
+  <section class="stats-grid">
+    <article class="stat-card">
+      <span class="stat-pill">Incidentes registrados</span>
+      <strong>{{ totalIncidentes() }}</strong>
+      <p>Casos metricados dentro de la consulta actual.</p>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-pill">Incidentes finalizados</span>
+      <strong>{{ totalFinalizados() }}</strong>
+      <p>Servicios cerrados con historial suficiente para medicion.</p>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-pill">Tiempo promedio respuesta</span>
+      <strong>{{ formatDuration(promedioRespuesta()) }}</strong>
+      <p>Promedio del tiempo inicial de respuesta registrado.</p>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-pill">Sin datos operativos</span>
+      <strong>{{ totalSinDatos() }}</strong>
+      <p>Incidentes sin informacion concluyente para rendimiento.</p>
+    </article>
+  </section>
+
+  <section class="analytics-grid">
+    <article class="content-card chart-card">
+      <div class="section-heading">
+        <div>
+          <span class="section-pill">Tendencia de incidentes</span>
+          <h3>Comparacion por fecha de reporte</h3>
+          <p>Registros metricados frente a incidentes finalizados dentro de la consulta.</p>
+        </div>
+      </div>
+
+      @if (trendSeries().length === 0) {
+        <div class="empty-card">
+          <strong>Sin tendencia disponible</strong>
+          <p>No hay suficientes incidentes para representar la evolucion visual.</p>
+        </div>
+      } @else {
+        <div class="line-chart">
+          <svg viewBox="0 0 520 220" preserveAspectRatio="none" aria-label="Tendencia de incidentes">
+            <line x1="0" y1="25" x2="520" y2="25" class="grid-line"></line>
+            <line x1="0" y1="85" x2="520" y2="85" class="grid-line"></line>
+            <line x1="0" y1="145" x2="520" y2="145" class="grid-line"></line>
+            <line x1="0" y1="205" x2="520" y2="205" class="grid-line"></line>
+            <polyline [attr.points]="registeredTrendPoints()" class="trend-line trend-line--registered"></polyline>
+            <polyline [attr.points]="attendedTrendPoints()" class="trend-line trend-line--attended"></polyline>
+          </svg>
+        </div>
+
+        <div class="chart-labels">
+          @for (point of trendSeries(); track point.label) {
+            <span>{{ point.label }}</span>
+          }
+        </div>
+
+        <div class="chart-legend">
+          <span><i class="legend-dot legend-dot--registered"></i> Registrados</span>
+          <span><i class="legend-dot legend-dot--attended"></i> Finalizados</span>
+        </div>
+      }
+    </article>
+
+    <article class="content-card distribution-card">
+      <div class="section-heading">
+        <div>
+          <span class="section-pill">Estados frecuentes</span>
+          <h3>Distribucion actual</h3>
+          <p>Estados operativos mas repetidos en las metricas filtradas.</p>
+        </div>
+      </div>
+
+      @if (frequentStatesDistribution().length === 0) {
+        <div class="empty-card">
+          <strong>Sin distribucion disponible</strong>
+          <p>Ajusta los filtros o carga metricas para ver la distribucion de estados.</p>
+        </div>
+      } @else {
+        <div class="distribution-list">
+          @for (item of frequentStatesDistribution(); track item.estado) {
+            <div class="distribution-item">
+              <div
+                class="distribution-bar"
+                [class.distribution-bar--primary]="item.tone === 'primary'"
+                [class.distribution-bar--warning]="item.tone === 'warning'"
+                [class.distribution-bar--danger]="item.tone === 'danger'"
+                [class.distribution-bar--muted]="item.tone === 'muted'"
+              >
+                <span [style.width.%]="item.porcentaje"></span>
+              </div>
+              <div class="distribution-copy">
+                <strong>{{ item.estado }}</strong>
+                <small>{{ item.porcentaje }}% · {{ item.cantidad }} incidentes</small>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </article>
+  </section>
+
+  <div class="metrics-layout">
+    <section class="content-card">
+      <div class="section-heading">
+        <div>
+          <span class="section-pill">Listado de metricas</span>
+          <h3>Incidentes medidos</h3>
+          <p>Selecciona un incidente para revisar su lectura operativa detallada.</p>
+        </div>
+
+        <span class="count-badge">{{ filteredMetrics().length }}</span>
+      </div>
+
+      @if (loadingList()) {
+        <div class="empty-card">
+          <strong>Cargando metricas de incidentes...</strong>
+          <p>Estamos consultando la lectura operativa y estrategica del backend.</p>
+        </div>
+      } @else if (metrics().length === 0) {
+        <div class="empty-card">
+          <strong>Sin metricas disponibles</strong>
+          <p>No se encontraron incidentes metricados para mostrar en el panel.</p>
+        </div>
+      } @else if (filteredMetrics().length === 0) {
+        <div class="empty-card">
+          <strong>Sin coincidencias</strong>
+          <p>Prueba con otros filtros para encontrar un incidente metricado.</p>
+        </div>
+      } @else {
+        <div class="table-wrap">
+          <table class="metrics-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Titulo</th>
+                <th>Estado</th>
+                <th>Respuesta</th>
+                <th>Atendidos</th>
+                <th>Estado frecuente</th>
+                <th>Rendimiento</th>
+                <th>Generado</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (metric of filteredMetrics(); track trackMetric($index, metric)) {
+                <tr
+                  [class.is-selected]="selectedIncidentId() === metric.id_incidente"
+                  (click)="selectMetric(metric.id_incidente)"
+                >
+                  <td>#{{ metric.id_incidente }}</td>
+                  <td>
+                    <div class="incident-copy">
+                      <strong>{{ metric.titulo }}</strong>
+                      <small>{{ formatDateTime(metric.fecha_reporte) }}</small>
+                    </div>
+                  </td>
+                  <td>
+                    <span [class]="getStatusBadgeClass(metric.estado_actual)">
+                      {{ metric.estado_actual }}
+                    </span>
+                  </td>
+                  <td>{{ formatDuration(metric.tiempo_respuesta_seg) }}</td>
+                  <td>{{ metric.incidentes_atendidos }}</td>
+                  <td>{{ metric.estado_frecuente }}</td>
+                  <td>
+                    <span [class]="getPerformanceBadgeClass(metric.rendimiento_operativo)">
+                      {{ metric.rendimiento_operativo }}
+                    </span>
+                  </td>
+                  <td>{{ formatDateTime(metric.fecha_generacion) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <div class="side-stack">
+      <section class="content-card">
+        <div class="section-heading">
+          <div>
+            <span class="section-pill">Detalle del incidente</span>
+            <h3>Lectura operativa</h3>
+            <p>Desglose de tiempos, rechazos y clasificacion generada.</p>
+          </div>
+        </div>
+
+        @if (loadingDetail()) {
+          <div class="empty-card">
+            <strong>Cargando detalle...</strong>
+            <p>Estamos consultando la metrica completa del incidente seleccionado.</p>
+          </div>
+        } @else if (detailErrorMessage()) {
+          <div class="feedback-box error">{{ detailErrorMessage() }}</div>
+        } @else if (selectedMetric(); as detail) {
+          <div class="detail-header">
+            <div>
+              <strong>#{{ detail.id_incidente }}</strong>
+              <h4>{{ detail.titulo }}</h4>
+            </div>
+
+            <span [class]="getPerformanceBadgeClass(detail.rendimiento_operativo)">
+              {{ detail.rendimiento_operativo }}
+            </span>
+          </div>
+
+          <div class="detail-badges">
+            <span [class]="getStatusBadgeClass(detail.estado_actual)">
+              {{ detail.estado_actual }}
+            </span>
+            <span class="status-badge">{{ detail.estado_frecuente }}</span>
+            <span class="status-badge">{{ detail.prioridad || 'Sin prioridad' }}</span>
+          </div>
+
+          <div class="detail-grid">
+            <article class="detail-item">
+              <small>Clasificacion IA</small>
+              <strong>{{ detail.clasificacion_ia || 'No disponible' }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Tipo de incidente</small>
+              <strong>{{ detail.tipo_incidente || 'No disponible' }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Tiempo asignacion</small>
+              <strong>{{ formatDuration(detail.tiempo_asignacion_seg) }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Tiempo llegada</small>
+              <strong>{{ formatDuration(detail.tiempo_llegada_seg) }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Tiempo resolucion</small>
+              <strong>{{ formatDuration(detail.tiempo_resolucion_seg) }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Tiempo respuesta</small>
+              <strong>{{ formatDuration(detail.tiempo_respuesta_seg) }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Cantidad rechazos</small>
+              <strong>{{ detail.cantidad_rechazos ?? 0 }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Fue reasignado</small>
+              <strong>{{ formatBoolean(detail.fue_reasignado) }}</strong>
+            </article>
+          </div>
+
+          <div class="strategic-note">
+            <strong>Lectura estrategica</strong>
+            <p>
+              Generado {{ formatDateTime(detail.fecha_generacion) }} a partir del historial del
+              incidente y sus estados operativos mas frecuentes.
+            </p>
+          </div>
+        } @else {
+          <div class="empty-card">
+            <strong>Selecciona un incidente</strong>
+            <p>Elige una fila del listado para revisar el detalle de la metrica.</p>
+          </div>
+        }
+      </section>
+    </div>
+  </div>
+
+  <section class="strategic-grid">
+    <article class="strategic-panel">
+      <span class="section-pill">Lectura estrategica</span>
+      <p>{{ strategicInsight() }}</p>
+    </article>
+  </section>
+</div>

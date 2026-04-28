@@ -1,0 +1,366 @@
+<div class="commissions-page">
+  <header class="hero-card commissions-hero">
+    <div class="hero-copy">
+      <p class="hero-kicker">Inteligencia y gestion estrategica</p>
+      <h2>Gestionar comision de la plataforma</h2>
+      <p>
+        Consulta comisiones generadas por pagos confirmados, aplica filtros
+        administrativos y ejecuta generacion puntual, masiva o recalculo si corresponde.
+      </p>
+    </div>
+
+    <article class="hero-note">
+      <span class="hero-note__label">Politica activa</span>
+      <strong>{{ activePolicyLabel() }}</strong>
+      <p>
+        {{
+          totalRegistros() > 0
+            ? totalRegistros() + ' comisiones visibles en la consulta actual.'
+            : 'Aun no hay comisiones registradas.'
+        }}
+      </p>
+    </article>
+  </header>
+
+  @if (errorMessage()) {
+    <div class="feedback-box error">{{ errorMessage() }}</div>
+  }
+
+  @if (successMessage()) {
+    <div class="feedback-box success">{{ successMessage() }}</div>
+  }
+
+  <form class="filters-bar" [formGroup]="filterForm">
+    <span class="filter-tag">Filtros</span>
+
+    <label class="filter-field filter-field--search">
+      <input
+        type="search"
+        formControlName="search"
+        placeholder="Buscar por comision, taller, incidente o referencia..."
+      />
+    </label>
+
+    <label class="filter-field">
+      <input type="text" formControlName="id_taller" placeholder="Taller" />
+    </label>
+
+    <label class="filter-field">
+      <select formControlName="estado">
+        <option value="">Estado: Todos</option>
+        <option value="PENDIENTE_LIQUIDACION">Pendiente liquidacion</option>
+        <option value="LIQUIDADA">Liquidada</option>
+        <option value="VALIDADA">Validada</option>
+      </select>
+    </label>
+
+    <label class="filter-field">
+      <input
+        type="text"
+        formControlName="id_pago_servicio"
+        placeholder="Pago"
+      />
+    </label>
+
+    <label class="filter-field">
+      <input
+        type="text"
+        formControlName="id_incidente"
+        placeholder="Incidente"
+      />
+    </label>
+
+    <button type="button" class="primary-button" (click)="applyFilters()">
+      Aplicar
+    </button>
+    <button type="button" class="secondary-button" (click)="clearFilters()">
+      Limpiar
+    </button>
+  </form>
+
+  <section class="stats-grid">
+    <article class="stat-card">
+      <span class="stat-pill">Comision total</span>
+      <strong>{{ formatCurrency(totalComision()) }}</strong>
+      <p>Monto acumulado dentro del resultado cargado.</p>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-pill">Servicios comisionables</span>
+      <strong>{{ totalRegistros() }}</strong>
+      <p>Pagos con comision visible para el panel.</p>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-pill">Porcentaje aplicado</span>
+      <strong>{{ formatPercentage(promedioPorcentaje()) }}</strong>
+      <p>Promedio de porcentaje calculado en las comisiones listadas.</p>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-pill">Pendientes de liquidacion</span>
+      <strong>{{ pendientesLiquidacion() }}</strong>
+      <p>Registros que aun esperan cierre financiero.</p>
+    </article>
+  </section>
+
+  <div class="commissions-layout">
+    <section class="content-card">
+      <div class="section-heading">
+        <div>
+          <span class="section-pill">Comisiones registradas</span>
+          <h3>Historial de comisiones calculadas</h3>
+          <p>Selecciona una fila para revisar el detalle financiero asociado.</p>
+        </div>
+
+        <span class="count-badge">{{ filteredCommissions().length }}</span>
+      </div>
+
+      @if (loadingList()) {
+        <div class="empty-card">
+          <strong>Cargando comisiones...</strong>
+          <p>Estamos consultando el historico financiero de la plataforma.</p>
+        </div>
+      } @else if (commissions().length === 0) {
+        <div class="empty-card">
+          <strong>Sin comisiones registradas</strong>
+          <p>No hay comisiones disponibles para los filtros aplicados.</p>
+        </div>
+      } @else if (filteredCommissions().length === 0) {
+        <div class="empty-card">
+          <strong>Sin coincidencias</strong>
+          <p>Ajusta el buscador local o cambia los filtros de la consulta.</p>
+        </div>
+      } @else {
+        <div class="table-wrap">
+          <table class="commissions-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Pago</th>
+                <th>Incidente</th>
+                <th>Taller</th>
+                <th>Monto pago</th>
+                <th>%</th>
+                <th>Comision</th>
+                <th>Estado</th>
+                <th>Pago</th>
+                <th>Calculo</th>
+                <th>Accion</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (
+                commission of filteredCommissions();
+                track trackCommission($index, commission)
+              ) {
+                <tr [class.is-selected]="selectedCommissionId() === commission.id_comision">
+                  <td>#{{ commission.id_comision }}</td>
+                  <td>#{{ commission.id_pago_servicio }}</td>
+                  <td>
+                    <div class="incident-copy">
+                      <strong>#{{ commission.id_incidente }}</strong>
+                      <small>{{ commission.titulo_incidente }}</small>
+                    </div>
+                  </td>
+                  <td>{{ commission.nombre_taller }}</td>
+                  <td>{{ formatCurrency(commission.monto_total_pago) }}</td>
+                  <td>{{ formatPercentage(commission.porcentaje) }}</td>
+                  <td>{{ formatCurrency(commission.monto_comision) }}</td>
+                  <td>
+                    <span [class]="getCommissionBadgeClass(commission.estado)">
+                      {{ commission.estado }}
+                    </span>
+                  </td>
+                  <td>
+                    <span [class]="getPaymentBadgeClass(commission.estado_pago)">
+                      {{ commission.estado_pago }}
+                    </span>
+                  </td>
+                  <td>{{ formatDateTime(commission.fecha_calculo) }}</td>
+                  <td>
+                    <button
+                      type="button"
+                      class="table-link"
+                      (click)="selectCommission(commission.id_comision)"
+                    >
+                      Ver detalle
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <div class="side-stack">
+      <section class="content-card">
+        <div class="section-heading">
+          <div>
+            <span class="section-pill">Calculo manual</span>
+            <h3>Generar o recalcular</h3>
+            <p>Si no ingresas un pago, la operacion se ejecuta en lote.</p>
+          </div>
+        </div>
+
+        @if (actionErrorMessage()) {
+          <div class="feedback-box error">{{ actionErrorMessage() }}</div>
+        }
+
+        <form class="action-form" [formGroup]="generateForm">
+          <label class="field-group">
+            <span>ID pago servicio</span>
+            <input
+              type="text"
+              formControlName="id_pago_servicio"
+              placeholder="Opcional para generar una comision puntual"
+            />
+          </label>
+
+          <label class="checkbox-row">
+            <input type="checkbox" formControlName="recalcular" />
+            <span>Recalcular comisiones en lugar de crear nuevas</span>
+          </label>
+
+          <div class="action-buttons">
+            <button
+              type="button"
+              class="primary-button"
+              [disabled]="generating()"
+              (click)="submitGeneration()"
+            >
+              {{ generating() ? 'Procesando...' : 'Calcular comisiones' }}
+            </button>
+
+            <button
+              type="button"
+              class="secondary-button"
+              [disabled]="generating() || !selectedCommission()"
+              (click)="recalculateSelected()"
+            >
+              Recalcular seleccionada
+            </button>
+          </div>
+        </form>
+
+        @if (lastGenerationSummary(); as summary) {
+          <div class="summary-card">
+            <strong>{{ summary.mensaje || 'Operacion completada' }}</strong>
+            <p>{{ summary.total_procesadas }} registros procesados en la ultima ejecucion.</p>
+          </div>
+        }
+      </section>
+
+      <section class="content-card">
+        <div class="section-heading">
+          <div>
+            <span class="section-pill">Detalle financiero</span>
+            <h3>Comision seleccionada</h3>
+            <p>Revisa datos generales, pago asociado y detalle del cobro.</p>
+          </div>
+        </div>
+
+        @if (loadingDetail()) {
+          <div class="empty-card">
+            <strong>Cargando detalle...</strong>
+            <p>Estamos consultando el desglose financiero de la comision.</p>
+          </div>
+        } @else if (detailErrorMessage()) {
+          <div class="feedback-box error">{{ detailErrorMessage() }}</div>
+        } @else if (selectedCommission(); as detail) {
+          <div class="detail-banner">
+            <strong>#{{ detail.id_comision }} · {{ detail.nombre_taller }}</strong>
+            <p>{{ detail.titulo_incidente }}</p>
+          </div>
+
+          <div class="detail-grid">
+            <article class="detail-item">
+              <small>ID pago</small>
+              <strong>#{{ detail.id_pago_servicio }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>ID incidente</small>
+              <strong>#{{ detail.id_incidente }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Monto total pago</small>
+              <strong>{{ formatCurrency(detail.monto_total_pago) }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Porcentaje</small>
+              <strong>{{ formatPercentage(detail.porcentaje) }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Monto comision</small>
+              <strong>{{ formatCurrency(detail.monto_comision) }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Metodo pago</small>
+              <strong>{{ detail.metodo_pago || 'No disponible' }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Estado comision</small>
+              <strong>{{ detail.estado }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Estado pago</small>
+              <strong>{{ detail.estado_pago }}</strong>
+            </article>
+            <article class="detail-item detail-item--wide">
+              <small>Referencia transaccion</small>
+              <strong>{{ detail.referencia_transaccion || 'No disponible' }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Fecha pago</small>
+              <strong>{{ formatDateTime(detail.fecha_pago) }}</strong>
+            </article>
+            <article class="detail-item">
+              <small>Fecha calculo</small>
+              <strong>{{ formatDateTime(detail.fecha_calculo) }}</strong>
+            </article>
+          </div>
+
+          <div class="subsection">
+            <h4>Detalle de cobro</h4>
+
+            @if (detail.detalles_pago.length === 0) {
+              <div class="empty-card empty-card--compact">
+                <strong>Sin detalles de pago</strong>
+                <p>El backend no devolvio lineas de cobro para esta comision.</p>
+              </div>
+            } @else {
+              <div class="detail-lines">
+                @for (item of detail.detalles_pago; track trackDetailRow($index, item)) {
+                  <article class="line-item">
+                    <div>
+                      <strong>{{ item.descripcion }}</strong>
+                      <small>
+                        {{ item.tipo_auxilio || 'Sin tipo de auxilio' }}
+                        @if (item.id_taller_auxilio) {
+                          · Auxilio #{{ item.id_taller_auxilio }}
+                        }
+                      </small>
+                    </div>
+
+                    <div class="line-item__numbers">
+                      <span>{{ item.cantidad }} × {{ formatCurrency(item.precio_unitario) }}</span>
+                      <strong>{{ formatCurrency(item.subtotal) }}</strong>
+                    </div>
+                  </article>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="empty-card">
+            <strong>Selecciona una comision</strong>
+            <p>Usa la tabla para consultar el detalle financiero completo.</p>
+          </div>
+        }
+      </section>
+    </div>
+  </div>
+</div>

@@ -120,7 +120,7 @@ export class SolicitudesDisponibles implements OnInit, OnDestroy {
       this.markerLatitude,
       this.markerLongitude,
       this.incidentLatitude,
-      this.incidentLongitude
+      this.incidentLongitude,
     );
 
     return distance < 1 ? `${Math.round(distance * 1000)} m` : `${distance.toFixed(1)} km`;
@@ -176,7 +176,7 @@ export class SolicitudesDisponibles implements OnInit, OnDestroy {
       next: (response) => {
         this.incidentes = response ?? [];
         const missingRequestIds = this.incidentes.filter(
-          (incidente) => !incidente.id_solicitud_taller
+          (incidente) => !incidente.id_solicitud_taller,
         ).length;
 
         if (missingRequestIds > 0) {
@@ -185,13 +185,30 @@ export class SolicitudesDisponibles implements OnInit, OnDestroy {
             missingRequestIds === 1
               ? 'Hay 1 incidente sin id_solicitud_taller. Ese registro no podra abrir el detalle del taller.'
               : `Hay ${missingRequestIds} incidentes sin id_solicitud_taller. Esos registros no podran abrir el detalle del taller.`;
+        } else {
+          this.errorMessage = '';
         }
 
         this.loading = false;
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.errorMessage = 'No se pudieron cargar los incidentes disponibles.';
+      error: (error) => {
+        const httpError = error as {
+          status?: number;
+          error?: { detail?: string };
+        };
+
+        if (httpError?.status === 401) {
+          this.errorMessage = 'Tu sesion ya no es valida. Vuelve a iniciar sesion para consultar incidentes disponibles.';
+        } else if (httpError?.status === 403) {
+          this.errorMessage = 'No tienes permisos suficientes para consultar incidentes disponibles del taller.';
+        } else if (httpError?.status === 405) {
+          this.errorMessage = 'El backend rechazo el metodo HTTP de esta consulta. La pantalla ya debe usar GET; recarga la aplicacion e intenta nuevamente.';
+        } else {
+          this.errorMessage =
+            httpError?.error?.detail || 'No se pudieron cargar los incidentes disponibles.';
+        }
+
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -214,8 +231,7 @@ export class SolicitudesDisponibles implements OnInit, OnDestroy {
     }
 
     if (!incidente.id_solicitud_taller) {
-      this.errorMessage =
-        'No se encontro el identificador de solicitud para abrir el detalle.';
+      this.errorMessage = 'No se encontro el identificador de solicitud para abrir el detalle.';
       this.cdr.detectChanges();
       return;
     }
@@ -292,7 +308,7 @@ export class SolicitudesDisponibles implements OnInit, OnDestroy {
         this.errorMessage = 'No se pudo obtener la ubicacion del navegador.';
         this.cdr.detectChanges();
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 10000 },
     );
   }
 
@@ -325,7 +341,7 @@ export class SolicitudesDisponibles implements OnInit, OnDestroy {
   private connectSeguimientoSocket(): void {
     this.seguimientoSocket?.close();
     this.seguimientoSocket = this.seguimientoTecnicoService.createSeguimientoSocket(
-      this.technicianIncidentId
+      this.technicianIncidentId,
     );
 
     if (!this.seguimientoSocket) {
@@ -373,20 +389,15 @@ export class SolicitudesDisponibles implements OnInit, OnDestroy {
       this.tracking = {
         id_incidente: Number(payload.id_incidente ?? this.technicianIncidentId),
         id_tecnico: Number(payload.id_tecnico ?? this.tracking?.id_tecnico ?? 11),
-        id_unidad_movil: Number(
-          payload.id_unidad_movil ?? this.tracking?.id_unidad_movil ?? 11
-        ),
+        id_unidad_movil: Number(payload.id_unidad_movil ?? this.tracking?.id_unidad_movil ?? 11),
         latitud_actual: payload.latitud_actual ?? payload.latitud ?? this.markerLatitude,
-        longitud_actual:
-          payload.longitud_actual ?? payload.longitud ?? this.markerLongitude,
+        longitud_actual: payload.longitud_actual ?? payload.longitud ?? this.markerLongitude,
         fecha_actualizacion:
           payload.fecha_actualizacion ?? this.tracking?.fecha_actualizacion ?? '',
         estado_asignacion:
           payload.estado_asignacion ?? this.tracking?.estado_asignacion ?? 'EN_CAMINO',
         estado_servicio_actual:
-          payload.estado_servicio_actual ??
-          this.tracking?.estado_servicio_actual ??
-          'EN_CAMINO',
+          payload.estado_servicio_actual ?? this.tracking?.estado_servicio_actual ?? 'EN_CAMINO',
         mensaje:
           payload.mensaje ??
           (event.type === 'conexion_establecida'
@@ -423,7 +434,7 @@ export class SolicitudesDisponibles implements OnInit, OnDestroy {
     startLat: number,
     startLon: number,
     endLat: number,
-    endLon: number
+    endLon: number,
   ): number {
     const earthRadiusKm = 6371;
     const latDelta = this.toRadians(endLat - startLat);
@@ -432,10 +443,7 @@ export class SolicitudesDisponibles implements OnInit, OnDestroy {
     const endLatRad = this.toRadians(endLat);
     const a =
       Math.sin(latDelta / 2) * Math.sin(latDelta / 2) +
-      Math.cos(startLatRad) *
-        Math.cos(endLatRad) *
-        Math.sin(lonDelta / 2) *
-        Math.sin(lonDelta / 2);
+      Math.cos(startLatRad) * Math.cos(endLatRad) * Math.sin(lonDelta / 2) * Math.sin(lonDelta / 2);
 
     return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
