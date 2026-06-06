@@ -38,54 +38,14 @@ export class AdminLayout {
       ],
     },
     {
-      title: 'Gestion de Clientes',
-      items: [
-        { label: 'Clientes registrados', route: '/admin' },
-        { label: 'Vehiculos registrados', route: '/admin' },
-        { label: 'Pagos', route: '/admin' },
-        { label: 'Calificaciones', route: '/admin' },
-      ],
-    },
-    {
-      title: 'Gestion Operativa de Taller y Tecnico',
-      items: [
-        { label: 'Talleres registrados', route: '/admin' },
-        { label: 'Tecnicos registrados', route: '/admin' },
-        { label: 'Servicios ofrecidos', route: '/admin' },
-        { label: 'Tipos de vehiculo atendidos', route: '/admin' },
-        { label: 'Disponibilidad de talleres', route: '/admin' },
-        { label: 'Disponibilidad de tecnicos', route: '/admin' },
-        { label: 'Unidades moviles', route: '/admin' },
-      ],
-    },
-    {
-      title: 'Gestion de Incidentes y Atencion',
-      items: [
-        { label: 'Incidentes reportados', route: '/admin' },
-        { label: 'Incidentes disponibles', route: '/admin' },
-        { label: 'Solicitudes', route: '/admin' },
-        { label: 'Asignaciones', route: '/admin' },
-        { label: 'Estado del servicio', route: '/admin' },
-        { label: 'Incidentes asignados', route: '/admin' },
-      ],
-    },
-    {
       title: 'Seguimiento y Monitoreo del Servicio',
       items: [
-        { label: 'Estado de servicios', route: '/admin' },
-        { label: 'Asignaciones de auxilio', route: '/admin' },
-        { label: 'Notificaciones enviadas', route: '/admin' },
         { label: 'Historial de incidentes', route: '/admin/historial-incidentes' },
-        { label: 'Ubicaciones registradas', route: '/admin' },
-        { label: 'Llegadas al incidente', route: '/admin' },
       ],
     },
     {
       title: 'Inteligencia y Gestion Estrategica',
       items: [
-        { label: 'Analisis IA', route: '/admin' },
-        { label: 'Informacion adicional solicitada', route: '/admin' },
-        { label: 'Asignaciones inteligentes', route: '/admin' },
         { label: 'Metricas de incidentes', route: '/admin/metricas-incidentes' },
         { label: 'Comisiones', route: '/admin/comisiones' },
       ],

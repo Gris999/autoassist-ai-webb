@@ -3,15 +3,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import {
-  catchError,
-  finalize,
-  forkJoin,
-  map,
-  of,
-  startWith,
-  switchMap,
-} from 'rxjs';
+import { catchError, finalize, forkJoin, map, of, startWith, switchMap } from 'rxjs';
 
 import { TokenService } from '../../../../core/services/token.service';
 import {
@@ -27,11 +19,6 @@ import { WorkshopOperationalService } from '../../services/workshop-operational.
 type EstadoFilter = 'todos' | 'activos' | 'deshabilitados';
 type DisponibilidadFilter = 'todos' | 'disponibles' | 'no_disponibles';
 type TechnicianEditorMode = 'create' | 'edit' | 'view';
-
-interface SystemRule {
-  title: string;
-  description: string;
-}
 
 @Component({
   selector: 'app-gestionar-tecnicos',
@@ -65,24 +52,6 @@ export class GestionarTecnicos implements OnInit {
   readonly selectedTechnicianId = signal<number | null>(null);
   readonly selectedTechnicianDetail = signal<TecnicoDetalle | null>(null);
 
-  readonly systemRules: SystemRule[] = [
-    {
-      title: 'Estado y disponibilidad',
-      description:
-        'Un tecnico deshabilitado no puede quedar disponible. La disponibilidad se ajusta desde esta vista y el estado se cambia solo con habilitar o deshabilitar.',
-    },
-    {
-      title: 'Registro y edicion',
-      description:
-        'El email no puede repetirse. La contrasena solo se envia al registrar un nuevo tecnico.',
-    },
-    {
-      title: 'Especialidades',
-      description:
-        'Guardar especialidades con el boton principal reemplaza la lista completa usando PUT.',
-    },
-  ];
-
   readonly filtersForm = this.fb.nonNullable.group({
     search: [''],
     estado: ['todos' as EstadoFilter],
@@ -107,14 +76,14 @@ export class GestionarTecnicos implements OnInit {
 
   private readonly filterValue = toSignal(
     this.filtersForm.valueChanges.pipe(startWith(this.filtersForm.getRawValue())),
-    { initialValue: this.filtersForm.getRawValue() }
+    { initialValue: this.filtersForm.getRawValue() },
   );
 
   private readonly specialtySelectionValue = toSignal(
     this.specialtiesForm.controls.ids_especialidad.valueChanges.pipe(
-      startWith(this.specialtiesForm.controls.ids_especialidad.getRawValue())
+      startWith(this.specialtiesForm.controls.ids_especialidad.getRawValue()),
     ),
-    { initialValue: this.specialtiesForm.controls.ids_especialidad.getRawValue() }
+    { initialValue: this.specialtiesForm.controls.ids_especialidad.getRawValue() },
   );
 
   readonly selectedTechnician = computed(() => {
@@ -146,27 +115,17 @@ export class GestionarTecnicos implements OnInit {
         return false;
       }
 
-      if (
-        filters.disponibilidad === 'disponibles' &&
-        !technician.disponible
-      ) {
+      if (filters.disponibilidad === 'disponibles' && !technician.disponible) {
         return false;
       }
 
-      if (
-        filters.disponibilidad === 'no_disponibles' &&
-        technician.disponible
-      ) {
+      if (filters.disponibilidad === 'no_disponibles' && technician.disponible) {
         return false;
       }
 
       if (selectedSpecialtyId !== null) {
         const specialties = this.specialtiesByTechnician()[technician.id_tecnico] ?? [];
-        if (
-          !specialties.some(
-            (specialty) => specialty.id_especialidad === selectedSpecialtyId
-          )
-        ) {
+        if (!specialties.some((specialty) => specialty.id_especialidad === selectedSpecialtyId)) {
           return false;
         }
       }
@@ -182,7 +141,7 @@ export class GestionarTecnicos implements OnInit {
         technician.celular,
         technician.telefono_contacto,
         ...(this.specialtiesByTechnician()[technician.id_tecnico] ?? []).map(
-          (specialty) => specialty.nombre
+          (specialty) => specialty.nombre,
         ),
       ]
         .join(' ')
@@ -194,13 +153,13 @@ export class GestionarTecnicos implements OnInit {
 
   readonly totalTechnicians = computed(() => this.technicians().length);
   readonly totalActive = computed(
-    () => this.technicians().filter((technician) => technician.estado).length
+    () => this.technicians().filter((technician) => technician.estado).length,
   );
   readonly totalAvailable = computed(
-    () => this.technicians().filter((technician) => technician.disponible).length
+    () => this.technicians().filter((technician) => technician.disponible).length,
   );
   readonly totalDisabled = computed(
-    () => this.technicians().filter((technician) => !technician.estado).length
+    () => this.technicians().filter((technician) => !technician.estado).length,
   );
 
   readonly isCreateMode = computed(() => this.editorMode() === 'create');
@@ -218,15 +177,12 @@ export class GestionarTecnicos implements OnInit {
 
   readonly hasSpecialtyChanges = computed(() => {
     const currentIds = this.normalizeIds(
-      this.selectedTechnicianSpecialties().map(
-        (specialty) => specialty.id_especialidad
-      )
+      this.selectedTechnicianSpecialties().map((specialty) => specialty.id_especialidad),
     );
     const nextIds = this.normalizeIds(this.specialtySelectionValue());
 
     return (
-      currentIds.length !== nextIds.length ||
-      currentIds.some((id, index) => id !== nextIds[index])
+      currentIds.length !== nextIds.length || currentIds.some((id, index) => id !== nextIds[index])
     );
   });
 
@@ -260,8 +216,8 @@ export class GestionarTecnicos implements OnInit {
               technicians,
               catalog,
               specialtiesByTechnician,
-            }))
-          )
+            })),
+          ),
         ),
         finalize(() => {
           if (isInitialLoad) {
@@ -269,7 +225,7 @@ export class GestionarTecnicos implements OnInit {
           } else {
             this.refreshing.set(false);
           }
-        })
+        }),
       )
       .subscribe({
         next: ({ technicians, catalog, specialtiesByTechnician }) => {
@@ -278,8 +234,7 @@ export class GestionarTecnicos implements OnInit {
           this.specialtiesByTechnician.set(specialtiesByTechnician);
 
           const nextSelectedId =
-            technicians.find((technician) => technician.id_tecnico === selectedId)
-              ?.id_tecnico ??
+            technicians.find((technician) => technician.id_tecnico === selectedId)?.id_tecnico ??
             technicians[0]?.id_tecnico ??
             null;
 
@@ -293,17 +248,10 @@ export class GestionarTecnicos implements OnInit {
             return;
           }
 
-          this.selectTechnician(
-            nextSelectedId,
-            currentMode === 'edit' ? 'edit' : 'view',
-            false
-          );
+          this.selectTechnician(nextSelectedId, currentMode === 'edit' ? 'edit' : 'view', false);
         },
         error: (error) => {
-          this.handleHttpError(
-            error,
-            'No se pudo cargar la gestion de tecnicos del taller.'
-          );
+          this.handleHttpError(error, 'No se pudo cargar la gestion de tecnicos del taller.');
         },
       });
   }
@@ -322,7 +270,7 @@ export class GestionarTecnicos implements OnInit {
   selectTechnician(
     idTecnico: number,
     mode: TechnicianEditorMode = 'view',
-    forceSpecialtiesReload = true
+    forceSpecialtiesReload = true,
   ): void {
     this.selectedTechnicianId.set(idTecnico);
     this.selectionLoading.set(true);
@@ -352,10 +300,8 @@ export class GestionarTecnicos implements OnInit {
           }));
           this.specialtiesForm.controls.ids_especialidad.setValue(
             this.normalizeIds(
-              specialties.especialidades.map(
-                (specialty) => specialty.id_especialidad
-              )
-            )
+              specialties.especialidades.map((specialty) => specialty.id_especialidad),
+            ),
           );
 
           if (mode === 'edit') {
@@ -367,10 +313,7 @@ export class GestionarTecnicos implements OnInit {
           }
         },
         error: (error) => {
-          this.handleHttpError(
-            error,
-            'No se pudo cargar el detalle del tecnico seleccionado.'
-          );
+          this.handleHttpError(error, 'No se pudo cargar el detalle del tecnico seleccionado.');
         },
       });
   }
@@ -394,18 +337,14 @@ export class GestionarTecnicos implements OnInit {
 
     if (this.technicianForm.invalid) {
       this.technicianForm.markAllAsTouched();
-      this.errorMessage.set(
-        'Revisa los datos del tecnico antes de guardar.'
-      );
+      this.errorMessage.set('Revisa los datos del tecnico antes de guardar.');
       return;
     }
 
     const rawValue = this.technicianForm.getRawValue();
 
     if (!rawValue.estado && rawValue.disponible) {
-      this.errorMessage.set(
-        'Un tecnico deshabilitado no puede quedar disponible.'
-      );
+      this.errorMessage.set('Un tecnico deshabilitado no puede quedar disponible.');
       return;
     }
 
@@ -416,9 +355,7 @@ export class GestionarTecnicos implements OnInit {
 
     const detail = this.selectedTechnicianDetail();
     if (!detail) {
-      this.errorMessage.set(
-        'Selecciona un tecnico valido antes de editar.'
-      );
+      this.errorMessage.set('Selecciona un tecnico valido antes de editar.');
       return;
     }
 
@@ -441,10 +378,7 @@ export class GestionarTecnicos implements OnInit {
           this.successMessage.set('Tecnico actualizado correctamente.');
         },
         error: (error) => {
-          this.handleHttpError(
-            error,
-            'No se pudo actualizar el tecnico seleccionado.'
-          );
+          this.handleHttpError(error, 'No se pudo actualizar el tecnico seleccionado.');
         },
       });
   }
@@ -458,62 +392,52 @@ export class GestionarTecnicos implements OnInit {
       ? this.workshopOperationalService.habilitarTecnico(technician.id_tecnico)
       : this.workshopOperationalService.deshabilitarTecnico(technician.id_tecnico);
 
-    request
-      .pipe(finalize(() => this.statusSavingId.set(null)))
-      .subscribe({
-        next: (response) => {
-          this.technicians.update((current) =>
-            this.sortTechnicians(
-              current.map((item) =>
-                item.id_tecnico === response.id_tecnico
-                  ? {
-                      ...item,
-                      estado: response.estado,
-                      disponible: response.disponible,
-                    }
-                  : item
-              )
-            )
-          );
+    request.pipe(finalize(() => this.statusSavingId.set(null))).subscribe({
+      next: (response) => {
+        this.technicians.update((current) =>
+          this.sortTechnicians(
+            current.map((item) =>
+              item.id_tecnico === response.id_tecnico
+                ? {
+                    ...item,
+                    estado: response.estado,
+                    disponible: response.disponible,
+                  }
+                : item,
+            ),
+          ),
+        );
 
-          if (this.selectedTechnicianId() === response.id_tecnico) {
-            const detail = this.selectedTechnicianDetail();
-            if (detail) {
-              const nextDetail = {
-                ...detail,
-                estado: response.estado,
-                disponible: response.disponible,
-              };
-              this.selectedTechnicianDetail.set(nextDetail);
-              if (this.isEditMode()) {
-                this.patchTechnicianForm(nextDetail);
-              }
+        if (this.selectedTechnicianId() === response.id_tecnico) {
+          const detail = this.selectedTechnicianDetail();
+          if (detail) {
+            const nextDetail = {
+              ...detail,
+              estado: response.estado,
+              disponible: response.disponible,
+            };
+            this.selectedTechnicianDetail.set(nextDetail);
+            if (this.isEditMode()) {
+              this.patchTechnicianForm(nextDetail);
             }
           }
+        }
 
-          this.successMessage.set(
-            response.estado
-              ? 'Tecnico habilitado correctamente.'
-              : 'Tecnico deshabilitado correctamente.'
-          );
-        },
-        error: (error) => {
-          this.handleHttpError(
-            error,
-            'No se pudo actualizar el estado del tecnico.'
-          );
-        },
-      });
+        this.successMessage.set(
+          response.estado
+            ? 'Tecnico habilitado correctamente.'
+            : 'Tecnico deshabilitado correctamente.',
+        );
+      },
+      error: (error) => {
+        this.handleHttpError(error, 'No se pudo actualizar el estado del tecnico.');
+      },
+    });
   }
 
-  changeTechnicianAvailability(
-    technician: TecnicoResumen,
-    nextAvailability: boolean
-  ): void {
+  changeTechnicianAvailability(technician: TecnicoResumen, nextAvailability: boolean): void {
     if (!technician.estado && nextAvailability) {
-      this.errorMessage.set(
-        'No puedes marcar disponible a un tecnico deshabilitado.'
-      );
+      this.errorMessage.set('No puedes marcar disponible a un tecnico deshabilitado.');
       this.successMessage.set('');
       return;
     }
@@ -523,7 +447,7 @@ export class GestionarTecnicos implements OnInit {
       this.successMessage.set(
         nextAvailability
           ? 'El tecnico ya estaba disponible.'
-          : 'El tecnico ya estaba marcado como no disponible.'
+          : 'El tecnico ya estaba marcado como no disponible.',
       );
       return;
     }
@@ -551,14 +475,11 @@ export class GestionarTecnicos implements OnInit {
           this.successMessage.set(
             nextAvailability
               ? 'Tecnico marcado como disponible correctamente.'
-              : 'Tecnico marcado como no disponible correctamente.'
+              : 'Tecnico marcado como no disponible correctamente.',
           );
         },
         error: (error) => {
-          this.handleHttpError(
-            error,
-            'No se pudo actualizar la disponibilidad del tecnico.'
-          );
+          this.handleHttpError(error, 'No se pudo actualizar la disponibilidad del tecnico.');
         },
       });
   }
@@ -566,14 +487,12 @@ export class GestionarTecnicos implements OnInit {
   saveSpecialties(): void {
     const selectedTechnician = this.selectedTechnician();
     if (!selectedTechnician) {
-      this.specialtiesError.set(
-        'Selecciona un tecnico antes de guardar especialidades.'
-      );
+      this.specialtiesError.set('Selecciona un tecnico antes de guardar especialidades.');
       return;
     }
 
     const idsEspecialidad = this.normalizeIds(
-      this.specialtiesForm.controls.ids_especialidad.getRawValue()
+      this.specialtiesForm.controls.ids_especialidad.getRawValue(),
     );
 
     this.specialtiesSaving.set(true);
@@ -581,10 +500,7 @@ export class GestionarTecnicos implements OnInit {
     this.specialtiesSuccess.set('');
 
     this.workshopOperationalService
-      .reemplazarEspecialidadesTecnico(
-        selectedTechnician.id_tecnico,
-        idsEspecialidad
-      )
+      .reemplazarEspecialidadesTecnico(selectedTechnician.id_tecnico, idsEspecialidad)
       .pipe(finalize(() => this.specialtiesSaving.set(false)))
       .subscribe({
         next: (response) => {
@@ -594,19 +510,15 @@ export class GestionarTecnicos implements OnInit {
           }));
           this.specialtiesForm.controls.ids_especialidad.setValue(
             this.normalizeIds(
-              response.especialidades.map(
-                (specialty) => specialty.id_especialidad
-              )
-            )
+              response.especialidades.map((specialty) => specialty.id_especialidad),
+            ),
           );
-          this.specialtiesSuccess.set(
-            'Especialidades actualizadas correctamente.'
-          );
+          this.specialtiesSuccess.set('Especialidades actualizadas correctamente.');
         },
         error: (error) => {
           this.handleSpecialtiesError(
             error,
-            'No se pudieron guardar las especialidades del tecnico.'
+            'No se pudieron guardar las especialidades del tecnico.',
           );
         },
       });
@@ -615,9 +527,7 @@ export class GestionarTecnicos implements OnInit {
   removeSpecialty(idEspecialidad: number): void {
     const selectedTechnician = this.selectedTechnician();
     if (!selectedTechnician) {
-      this.specialtiesError.set(
-        'Selecciona un tecnico antes de quitar una especialidad.'
-      );
+      this.specialtiesError.set('Selecciona un tecnico antes de quitar una especialidad.');
       return;
     }
 
@@ -626,10 +536,7 @@ export class GestionarTecnicos implements OnInit {
     this.specialtiesSuccess.set('');
 
     this.workshopOperationalService
-      .quitarEspecialidadTecnico(
-        selectedTechnician.id_tecnico,
-        idEspecialidad
-      )
+      .quitarEspecialidadTecnico(selectedTechnician.id_tecnico, idEspecialidad)
       .pipe(finalize(() => this.specialtiesSaving.set(false)))
       .subscribe({
         next: (response) => {
@@ -639,20 +546,13 @@ export class GestionarTecnicos implements OnInit {
           }));
           this.specialtiesForm.controls.ids_especialidad.setValue(
             this.normalizeIds(
-              response.especialidades.map(
-                (specialty) => specialty.id_especialidad
-              )
-            )
+              response.especialidades.map((specialty) => specialty.id_especialidad),
+            ),
           );
-          this.specialtiesSuccess.set(
-            'Especialidad quitada correctamente.'
-          );
+          this.specialtiesSuccess.set('Especialidad quitada correctamente.');
         },
         error: (error) => {
-          this.handleSpecialtiesError(
-            error,
-            'No se pudo quitar la especialidad seleccionada.'
-          );
+          this.handleSpecialtiesError(error, 'No se pudo quitar la especialidad seleccionada.');
         },
       });
   }
@@ -677,16 +577,14 @@ export class GestionarTecnicos implements OnInit {
           }));
           this.specialtiesForm.controls.ids_especialidad.setValue(
             this.normalizeIds(
-              response.especialidades.map(
-                (specialty) => specialty.id_especialidad
-              )
-            )
+              response.especialidades.map((specialty) => specialty.id_especialidad),
+            ),
           );
         },
         error: (error) => {
           this.handleSpecialtiesError(
             error,
-            'No se pudieron recargar las especialidades del tecnico.'
+            'No se pudieron recargar las especialidades del tecnico.',
           );
         },
       });
@@ -695,7 +593,7 @@ export class GestionarTecnicos implements OnInit {
   toggleSpecialty(idEspecialidad: number, event: Event): void {
     const checked = (event.target as HTMLInputElement).checked;
     const currentIds = this.normalizeIds(
-      this.specialtiesForm.controls.ids_especialidad.getRawValue()
+      this.specialtiesForm.controls.ids_especialidad.getRawValue(),
     );
 
     const nextIds = checked
@@ -716,9 +614,7 @@ export class GestionarTecnicos implements OnInit {
   }
 
   getInitials(technician: TecnicoResumen | TecnicoDetalle): string {
-    return `${technician.nombres.charAt(0)}${technician.apellidos.charAt(0)}`
-      .trim()
-      .toUpperCase();
+    return `${technician.nombres.charAt(0)}${technician.apellidos.charAt(0)}`.trim().toUpperCase();
   }
 
   getAvailabilityBadgeClass(disponible: boolean, estado = true): string {
@@ -740,9 +636,7 @@ export class GestionarTecnicos implements OnInit {
   }
 
   getStateBadgeClass(estado: boolean): string {
-    return estado
-      ? 'status-pill status-pill--active'
-      : 'status-pill status-pill--disabled';
+    return estado ? 'status-pill status-pill--active' : 'status-pill status-pill--disabled';
   }
 
   getSpecialtiesPreview(technicianId: number): Especialidad[] {
@@ -755,10 +649,6 @@ export class GestionarTecnicos implements OnInit {
 
   trackSpecialty(_: number, specialty: Especialidad): number {
     return specialty.id_especialidad;
-  }
-
-  trackRule(_: number, rule: SystemRule): string {
-    return rule.title;
   }
 
   private saveNewTechnician(rawValue: ReturnType<typeof this.technicianForm.getRawValue>): void {
@@ -792,10 +682,7 @@ export class GestionarTecnicos implements OnInit {
           this.successMessage.set('Tecnico registrado correctamente.');
         },
         error: (error) => {
-          this.handleHttpError(
-            error,
-            'No se pudo registrar el tecnico.'
-          );
+          this.handleHttpError(error, 'No se pudo registrar el tecnico.');
         },
       });
   }
@@ -816,9 +703,7 @@ export class GestionarTecnicos implements OnInit {
 
       const exists = current.some((item) => item.id_tecnico === technician.id_tecnico);
       const next = exists
-        ? current.map((item) =>
-            item.id_tecnico === technician.id_tecnico ? summary : item
-          )
+        ? current.map((item) => (item.id_tecnico === technician.id_tecnico ? summary : item))
         : [summary, ...current];
 
       return this.sortTechnicians(next);
@@ -912,7 +797,7 @@ export class GestionarTecnicos implements OnInit {
 
   private normalizeIds(ids: number[]): number[] {
     return [...new Set(ids.filter((id) => Number.isFinite(id) && id > 0))].sort(
-      (left, right) => left - right
+      (left, right) => left - right,
     );
   }
 
@@ -923,23 +808,18 @@ export class GestionarTecnicos implements OnInit {
 
     return forkJoin(
       technicians.map((technician) =>
-        this.workshopOperationalService
-          .getEspecialidadesTecnico(technician.id_tecnico)
-          .pipe(
-            map(
-              (response) =>
-                [technician.id_tecnico, response.especialidades] as const
-            ),
-            catchError(() => of([technician.id_tecnico, []] as const))
-          )
-      )
+        this.workshopOperationalService.getEspecialidadesTecnico(technician.id_tecnico).pipe(
+          map((response) => [technician.id_tecnico, response.especialidades] as const),
+          catchError(() => of([technician.id_tecnico, []] as const)),
+        ),
+      ),
     ).pipe(
       map((entries) =>
         entries.reduce<Record<number, Especialidad[]>>((accumulator, entry) => {
           accumulator[entry[0]] = [...entry[1]];
           return accumulator;
-        }, {})
-      )
+        }, {}),
+      ),
     );
   }
 
@@ -964,30 +844,21 @@ export class GestionarTecnicos implements OnInit {
     }
 
     if (httpError?.status === 403) {
-      this.errorMessage.set(
-        'No tienes permisos para gestionar tecnicos del taller.'
-      );
+      this.errorMessage.set('No tienes permisos para gestionar tecnicos del taller.');
       return;
     }
 
-    if (
-      httpError?.status === 400 ||
-      httpError?.status === 404 ||
-      httpError?.status === 422
-    ) {
+    if (httpError?.status === 400 || httpError?.status === 404 || httpError?.status === 422) {
       this.errorMessage.set(httpError.error?.detail ?? fallbackMessage);
       return;
     }
 
     this.errorMessage.set(
-      'No se pudo completar la solicitud. Verifica tu conexion e intenta nuevamente.'
+      'No se pudo completar la solicitud. Verifica tu conexion e intenta nuevamente.',
     );
   }
 
-  private handleSpecialtiesError(
-    error: unknown,
-    fallbackMessage: string
-  ): void {
+  private handleSpecialtiesError(error: unknown, fallbackMessage: string): void {
     const httpError = error as {
       status?: number;
       error?: { detail?: string };
@@ -1000,23 +871,17 @@ export class GestionarTecnicos implements OnInit {
     }
 
     if (httpError?.status === 403) {
-      this.specialtiesError.set(
-        'No tienes permisos para gestionar especialidades.'
-      );
+      this.specialtiesError.set('No tienes permisos para gestionar especialidades.');
       return;
     }
 
-    if (
-      httpError?.status === 400 ||
-      httpError?.status === 404 ||
-      httpError?.status === 422
-    ) {
+    if (httpError?.status === 400 || httpError?.status === 404 || httpError?.status === 422) {
       this.specialtiesError.set(httpError.error?.detail ?? fallbackMessage);
       return;
     }
 
     this.specialtiesError.set(
-      'No se pudo completar la solicitud de especialidades. Intenta nuevamente.'
+      'No se pudo completar la solicitud de especialidades. Intenta nuevamente.',
     );
   }
 }

@@ -165,43 +165,10 @@
   line-height: 1.6;
 }
 
-.section-label,
 .form-group label {
   margin-bottom: 12px;
   color: #304665;
   font-weight: 700;
-}
-
-.access-options {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.access-chip {
-  min-height: 54px;
-  padding: 0 18px;
-  border-radius: 18px;
-  border: 1px solid #d2deea;
-  background: #ffffff;
-  color: #1e3252;
-  font-weight: 700;
-  cursor: pointer;
-  transition:
-    border-color 0.2s ease,
-    background-color 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.access-chip:hover {
-  transform: translateY(-1px);
-}
-
-.access-chip.active {
-  border-color: #11a4ea;
-  background: #eef8ff;
-  box-shadow: 0 12px 24px rgba(17, 164, 234, 0.12);
 }
 
 .login-form {
@@ -274,27 +241,13 @@
   cursor: pointer;
 }
 
-.form-meta,
-.checkbox-row {
-  display: flex;
-  align-items: center;
-}
-
 .form-meta {
-  justify-content: space-between;
-  gap: 14px;
-  flex-wrap: wrap;
+  padding: 4px 2px 0;
 }
 
-.checkbox-row {
-  gap: 10px;
+.helper-copy {
   color: #70829a;
-}
-
-.checkbox-row input {
-  width: 18px;
-  height: 18px;
-  accent-color: #11a4ea;
+  line-height: 1.6;
 }
 
 .submit-button {
@@ -381,14 +334,8 @@
   .login-panel {
     padding: 28px 18px 32px;
   }
-
-  .access-options {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .form-meta {
-    align-items: flex-start;
-    flex-direction: column;
+    padding-top: 0;
   }
 
   .feature-card,

@@ -29,7 +29,7 @@ export class TallerLayout {
   private readonly authService = inject(AuthService);
   private readonly tokenService = inject(TokenService);
   private readonly router = inject(Router);
-  readonly activeGroup = signal('Gestion Operativa de Taller y Tecnico');
+  readonly activeGroup = signal('Gestion Operativa');
   readonly sidebarCollapsed = signal(false);
   readonly isTechnicianPanel = computed(() => this.router.url.startsWith('/tecnico'));
   readonly panelLabel = computed(() =>
@@ -66,16 +66,13 @@ export class TallerLayout {
         {
           title: 'Gestion Operativa',
           shortLabel: 'GO',
-          items: [
-            { label: 'Inicio', route: '/tecnico' },
-          ],
+          items: [{ label: 'Inicio', route: '/tecnico' }],
         },
         {
           title: 'Gestion de Incidentes',
           shortLabel: 'IA',
           items: [
             { label: 'Mis asignaciones', route: '/tecnico/asignaciones' },
-            { label: 'Detalle del incidente', route: '/tecnico/incidentes/11' },
           ],
         },
         {
@@ -83,14 +80,7 @@ export class TallerLayout {
           shortLabel: 'SM',
           items: [
             { label: 'Seguimiento actual', route: '/tecnico/seguimiento' },
-            { label: 'Historial del incidente', route: '/tecnico/historial' },
-          ],
-        },
-        {
-          title: 'Inteligencia',
-          shortLabel: 'IE',
-          items: [
-            { label: 'Analisis IA', route: '/tecnico/incidentes/11' },
+            { label: 'Historial de incidentes', route: '/tecnico/historial' },
           ],
         },
         {
@@ -105,20 +95,13 @@ export class TallerLayout {
 
     return [
       {
-        title: 'Gestion Operativa de Taller y Tecnico',
+        title: 'Gestion Operativa',
         shortLabel: 'OT',
         items: [
           { label: 'Inicio del taller', route: '/taller' },
           { label: 'Disponibilidad del taller', route: '/taller/disponibilidad' },
-          { label: 'Servicios ofrecidos', route: '/taller/servicios', note: 'En la misma pantalla' },
-          { label: 'Tipos de vehiculo', route: '/taller/servicios', note: 'En la misma pantalla' },
+          { label: 'Servicios y cobertura', route: '/taller/servicios' },
           { label: 'Tecnicos', route: '/taller/tecnicos' },
-          {
-            label: 'Disponibilidad del tecnico',
-            route: '/taller/tecnicos',
-            note: 'En la misma pantalla',
-          },
-          { label: 'Especialidades', route: '/taller/tecnicos', note: 'En la misma pantalla' },
           { label: 'Unidades moviles', route: '/taller/unidades' },
         ],
       },
@@ -126,32 +109,14 @@ export class TallerLayout {
         title: 'Gestion de Incidentes y Atencion',
         shortLabel: 'IA',
         items: [
-          { label: 'Incidentes disponibles', route: '/taller/solicitudes' },
-          { label: 'Responder solicitud', disabled: true, note: 'Siguiente paso' },
-          { label: 'Asignar recursos', disabled: true, note: 'Siguiente paso' },
-          { label: 'Estado del servicio', disabled: true, note: 'Siguiente paso' },
+          { label: 'Solicitudes disponibles', route: '/taller/solicitudes' },
+          { label: 'Historial de incidentes', route: '/taller/historial' },
         ],
-      },
-      {
-        title: 'Seguimiento y Monitoreo del Servicio',
-        shortLabel: 'SM',
-        items: [
-          { label: 'Notificaciones', disabled: true, note: 'Proximamente' },
-          { label: 'Historial', route: '/taller/historial' },
-        ],
-      },
-      {
-        title: 'Inteligencia y Gestion Estrategica',
-        shortLabel: 'IE',
-        items: [{ label: 'Comisiones', disabled: true, note: 'Proximamente' }],
       },
       {
         title: 'Autenticacion y Seguridad',
         shortLabel: 'AS',
-        items: [
-          { label: 'Perfil del taller', disabled: true, note: 'Proximamente' },
-          { label: 'Cerrar sesion', action: 'logout' },
-        ],
+        items: [{ label: 'Cerrar sesion', action: 'logout' }],
       },
     ];
   });

@@ -16,12 +16,10 @@
 
 .hero-card,
 .management-card,
-.metric-card,
 .empty-card,
 .helper-card,
 .specialty-row,
 .catalog-option,
-.rule-item,
 .table-row {
   border-radius: 24px;
   background: #ffffff;
@@ -130,22 +128,6 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px;
-}
-
-.metric-card {
-  padding: 20px;
-}
-
-.metric-card strong {
-  display: block;
-  margin: 10px 0 6px;
-  font-size: 2rem;
-}
-
 .management-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(360px, 0.9fr);
@@ -161,6 +143,19 @@
 .section-heading {
   display: grid;
   gap: 8px;
+}
+
+.section-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #eef6ff;
+  color: #0f91e2;
+  font-size: 0.85rem;
+  font-weight: 700;
 }
 
 .filters-grid,
@@ -300,8 +295,8 @@
 
 .action-button {
   min-height: 40px;
-  padding-inline: 14px;
-  font-size: 0.9rem;
+  padding-inline: 12px;
+  font-size: 0.82rem;
 }
 
 .specialties-preview,
@@ -407,13 +402,6 @@
   cursor: pointer;
 }
 
-.rule-item {
-  display: grid;
-  gap: 6px;
-  padding: 16px 18px;
-  background: linear-gradient(180deg, #fbfdff 0%, #f3f8fc 100%);
-}
-
 .empty-card {
   display: grid;
   gap: 8px;
@@ -495,8 +483,7 @@
 
 @media (max-width: 1240px) {
   .management-grid,
-  .hero-card,
-  .metrics-grid {
+  .hero-card {
     grid-template-columns: 1fr;
   }
 }

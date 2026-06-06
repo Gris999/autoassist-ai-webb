@@ -18,8 +18,6 @@ interface QuickAccess {
   status?: 'available' | 'upcoming';
 }
 
-const TECNICO_INCIDENTE_ASIGNADO_ID = 11;
-
 @Component({
   selector: 'app-inicio-taller',
   standalone: true,
@@ -50,7 +48,7 @@ export class InicioTaller implements OnInit {
       return {
         kicker: 'Inicio tecnico',
         title: 'Panel del tecnico',
-        subtitle: 'Asignaciones, estado operativo y accesos por paquete.',
+        subtitle: 'Disponibilidad y accesos reales del panel tecnico.',
         primaryLabel: 'Ver mis asignaciones',
         primaryRoute: '/tecnico/asignaciones',
         secondaryLabel: 'Mi disponibilidad',
@@ -82,16 +80,6 @@ export class InicioTaller implements OnInit {
           value: incidentes.filter((item) => Number(item.id_prioridad) === 1).length,
           helper: 'requieren atencion',
         },
-        {
-          label: 'Servicios en curso',
-          value: 0,
-          helper: 'activos ahora',
-        },
-        {
-          label: 'Evidencias por subir',
-          value: 0,
-          helper: 'pendientes',
-        },
       ];
     }
 
@@ -107,14 +95,9 @@ export class InicioTaller implements OnInit {
         helper: 'casos urgentes',
       },
       {
-        label: 'Tecnicos disponibles',
-        value: 8,
-        helper: 'operativos hoy',
-      },
-      {
-        label: 'Unidades moviles',
-        value: 5,
-        helper: 'disponibles',
+        label: 'Cobertura activa',
+        value: this.workshopAvailability()?.disponible ? 1 : 0,
+        helper: 'segun disponibilidad actual',
       },
     ];
   });
@@ -123,41 +106,24 @@ export class InicioTaller implements OnInit {
     if (this.isTechnicianHome()) {
       return [
         {
-        title: 'Mi disponibilidad',
+          title: 'Mi disponibilidad',
           description: 'Consulta y actualiza tu disponibilidad real para nuevas asignaciones.',
           helper: 'Gestion Operativa',
           status: 'available',
         },
         {
-          title: 'Mis especialidades',
-          description: 'Mantiene visibles las capacidades tecnicas asociadas a tu perfil.',
-          helper: 'Gestion Operativa',
-          status: 'upcoming',
-        },
-        {
-          title: 'Solicitudes asignadas',
-          description: 'Revisa incidentes vinculados a tu atencion y entra al detalle del caso.',
+          title: 'Mis asignaciones',
+          description: 'Consulta la vista habilitada para revisar asignaciones del tecnico.',
           helper: 'Gestion de Incidentes',
           route: '/tecnico/asignaciones',
           status: 'available',
         },
         {
-          title: 'Estado del servicio',
-          description: 'Actualiza avance, llegada y cierre cuando el caso ya este en curso.',
-          helper: 'Gestion de Incidentes',
-          status: 'upcoming',
-        },
-        {
-          title: 'Ruta y monitoreo',
-          description: 'Consulta ubicacion, notificaciones e historial de servicios.',
+          title: 'Historial de incidentes',
+          description: 'Revisa la trazabilidad disponible del servicio desde el panel tecnico.',
           helper: 'Seguimiento',
-          status: 'upcoming',
-        },
-        {
-          title: 'Analisis automatico',
-          description: 'Usa el resultado IA desde el detalle del incidente para orientar la atencion.',
-          helper: 'Inteligencia',
-          status: 'upcoming',
+          route: '/tecnico/historial',
+          status: 'available',
         },
       ];
     }
@@ -178,31 +144,18 @@ export class InicioTaller implements OnInit {
         status: 'available',
       },
       {
-        title: 'Servicios ofrecidos',
-        description: 'Configura los servicios de auxilio activos y sus precios referenciales.',
+        title: 'Servicios y cobertura',
+        description: 'Configura servicios de auxilio y tipos de vehiculo atendidos.',
         helper: 'Gestion Operativa',
         route: '/taller/servicios',
         status: 'available',
       },
       {
-        title: 'Tipos de vehiculo',
-        description: 'Define los vehiculos compatibles que el taller puede atender.',
-        helper: 'Gestion Operativa',
-        route: '/taller/servicios',
-        status: 'available',
-      },
-      {
-        title: 'Incidentes disponibles',
-        description: 'Revisa solicitudes pendientes y entra al detalle del caso.',
+        title: 'Solicitudes disponibles',
+        description: 'Revisa solicitudes pendientes y entra al detalle solo con identificador valido.',
         helper: 'Gestion de Incidentes',
         route: '/taller/solicitudes',
         status: 'available',
-      },
-      {
-        title: 'Comisiones',
-        description: 'Revisa el resumen economico cuando el modulo administrativo quede activo.',
-        helper: 'Inteligencia',
-        status: 'upcoming',
       },
     ];
   });
@@ -211,7 +164,7 @@ export class InicioTaller implements OnInit {
     const firstIncident = this.incidentes()[0];
     if (!firstIncident) {
       return this.isTechnicianHome()
-        ? 'Aun no hay asignaciones recientes. Cuando recibas una solicitud nueva aparecera aqui.'
+        ? 'Aun no hay asignaciones visibles. Esta vista evita simular incidentes hasta contar con datos reales.'
         : 'Aun no hay actividad reciente. Cuando ingresen solicitudes nuevas apareceran aqui.';
     }
 
@@ -277,20 +230,7 @@ export class InicioTaller implements OnInit {
       });
     } else {
       this.loadTechnicianAvailability();
-      this.incidentes.set([
-        {
-          id_incidente: TECNICO_INCIDENTE_ASIGNADO_ID,
-          titulo: 'Incidente asignado actual',
-          id_prioridad: 1,
-          id_estado_servicio_actual: 3,
-          estado_servicio_actual: 'EN_CAMINO',
-          fecha_reporte: new Date().toISOString(),
-          id_vehiculo: 0,
-          id_tipo_incidente: 0,
-          tipo_incidente: 'ASIGNADO',
-          prioridad: 'ALTA',
-        },
-      ]);
+      this.incidentes.set([]);
       this.loading.set(false);
     }
   }

@@ -135,7 +135,7 @@
   <section class="panel-section">
     <div class="section-heading with-toggle">
       <div>
-        <h2>{{ isTechnicianHome() ? 'Accesos del tecnico por paquete' : 'Accesos del taller por paquete' }}</h2>
+        <h2>{{ isTechnicianHome() ? 'Accesos disponibles del tecnico' : 'Accesos del taller por paquete' }}</h2>
       </div>
       <button class="panel-button" type="button" (click)="toggleSection('quick')">
         {{ quickAccessOpen() ? 'Ocultar' : 'Mostrar' }}
@@ -149,18 +149,18 @@
             <div class="quick-head">
               <span class="quick-helper">{{ card.helper }}</span>
               <span class="quick-badge" [class.is-upcoming]="card.status === 'upcoming'">
-                {{ card.status === 'available' ? 'Activo' : 'Proximamente' }}
+                {{ card.status === 'upcoming' ? 'Proximamente' : 'Disponible' }}
               </span>
             </div>
             <h3>{{ card.title }}</h3>
             <p>{{ card.description }}</p>
 
-            @if (card.route) {
-              <a class="quick-link" [routerLink]="card.route">Abrir</a>
-            } @else {
-              <button class="quick-link disabled" type="button" disabled>
-                Aun no disponible
+            @if (card.title === 'Mi disponibilidad' && isTechnicianHome()) {
+              <button class="quick-link quick-link--action" type="button" (click)="scrollToAvailability()">
+                Abrir
               </button>
+            } @else if (card.route) {
+              <a class="quick-link" [routerLink]="card.route">Abrir</a>
             }
           </article>
         }

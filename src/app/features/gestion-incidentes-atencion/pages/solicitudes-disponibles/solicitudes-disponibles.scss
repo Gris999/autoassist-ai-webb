@@ -37,7 +37,8 @@
 
 .page-heading p,
 .empty-state,
-.card p {
+.card p,
+.card-helper {
   margin: 0;
   color: #5f7087;
   line-height: 1.6;
@@ -121,6 +122,17 @@
   cursor: pointer;
 }
 
+.details-link-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
+}
+
+.card-helper {
+  display: block;
+  margin-top: 10px;
+  font-size: 0.88rem;
+}
+
 .tracking-panel {
   display: grid;
   gap: 16px;
@@ -128,6 +140,26 @@
   border-radius: 8px;
   border: 1px solid #dde8f4;
   background: #ffffff;
+}
+
+.empty-card {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border-radius: 8px;
+  border: 1px dashed #cfe0ef;
+  background: #f8fbff;
+}
+
+.empty-card h3 {
+  margin: 0;
+  color: #132443;
+}
+
+.empty-card p {
+  margin: 0;
+  color: #5f7087;
+  line-height: 1.6;
 }
 
 .assignments-panel {

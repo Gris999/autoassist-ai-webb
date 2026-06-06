@@ -187,24 +187,6 @@
   gap: 14px;
 }
 
-.search-box {
-  display: flex;
-  align-items: center;
-  min-width: 280px;
-  padding: 0 16px;
-  min-height: 48px;
-  border: 1px solid #d6e3ef;
-  border-radius: 999px;
-  background: #ffffff;
-}
-
-.search-box input {
-  width: 100%;
-  border: 0;
-  outline: 0;
-  background: transparent;
-}
-
 .avatar {
   background: #5567dd;
   color: #ffffff;
@@ -233,9 +215,5 @@
 
   .topbar {
     padding: 20px 16px 10px;
-  }
-
-  .search-box {
-    min-width: 0;
   }
 }

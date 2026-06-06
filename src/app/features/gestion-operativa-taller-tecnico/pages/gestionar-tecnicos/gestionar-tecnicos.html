@@ -4,8 +4,8 @@
       <span class="card-kicker">Gestion Operativa de Taller y Tecnico</span>
       <h2>Gestionar tecnicos</h2>
       <p>
-        Controla el personal tecnico del taller: alta, edicion, disponibilidad,
-        estado operativo y especialidades.
+        Controla el personal tecnico del taller: alta, edicion, disponibilidad, estado operativo y
+        especialidades.
       </p>
 
       <div class="hero-actions">
@@ -60,29 +60,6 @@
       <p>Estamos consultando el personal tecnico y sus especialidades.</p>
     </section>
   } @else {
-    <section class="metrics-grid">
-      <article class="metric-card">
-        <span>Tecnicos</span>
-        <strong>{{ totalTechnicians() }}</strong>
-        <small>Registrados en el taller</small>
-      </article>
-      <article class="metric-card">
-        <span>Activos</span>
-        <strong>{{ totalActive() }}</strong>
-        <small>Habilitados para operar</small>
-      </article>
-      <article class="metric-card">
-        <span>Disponibles</span>
-        <strong>{{ totalAvailable() }}</strong>
-        <small>Listos para asignaciones</small>
-      </article>
-      <article class="metric-card">
-        <span>Deshabilitados</span>
-        <strong>{{ totalDisabled() }}</strong>
-        <small>Fuera del flujo operativo</small>
-      </article>
-    </section>
-
     <section class="management-grid">
       <article class="management-card">
         <div class="section-heading">
@@ -90,6 +67,7 @@
             <h3>Listado de tecnicos</h3>
             <p>Filtra, consulta y ejecuta acciones operativas desde una sola vista.</p>
           </div>
+          <span class="section-count">{{ filteredTechnicians().length }} visibles</span>
         </div>
 
         <form class="filters-grid" [formGroup]="filtersForm">
@@ -136,9 +114,7 @@
         @if (filteredTechnicians().length === 0) {
           <div class="empty-card compact">
             <strong>Sin tecnicos visibles</strong>
-            <p>
-              No hay resultados para los filtros actuales o aun no se registraron tecnicos.
-            </p>
+            <p>No hay resultados para los filtros actuales o aun no se registraron tecnicos.</p>
           </div>
         } @else {
           <div class="table-shell">
@@ -170,7 +146,9 @@
                 </div>
 
                 <div class="table-cell">
-                  <span [class]="getAvailabilityBadgeClass(technician.disponible, technician.estado)">
+                  <span
+                    [class]="getAvailabilityBadgeClass(technician.disponible, technician.estado)"
+                  >
                     {{ getAvailabilityLabel(technician.disponible, technician.estado) }}
                   </span>
                 </div>
@@ -183,7 +161,10 @@
 
                 <div class="table-cell specialties-preview">
                   @if (getSpecialtiesPreview(technician.id_tecnico).length > 0) {
-                    @for (specialty of getSpecialtiesPreview(technician.id_tecnico); track trackSpecialty($index, specialty)) {
+                    @for (
+                      specialty of getSpecialtiesPreview(technician.id_tecnico);
+                      track trackSpecialty($index, specialty)
+                    ) {
                       <span class="specialty-chip">{{ specialty.nombre }}</span>
                     }
                   } @else {
@@ -209,10 +190,12 @@
                     "
                     (click)="changeTechnicianAvailability(technician, true)"
                   >
-                    @if (availabilitySavingId() === technician.id_tecnico && !technician.disponible) {
+                    @if (
+                      availabilitySavingId() === technician.id_tecnico && !technician.disponible
+                    ) {
                       Guardando...
                     } @else {
-                      Marcar disponible
+                      Disponible
                     }
                   </button>
                   <button
@@ -225,10 +208,12 @@
                     "
                     (click)="changeTechnicianAvailability(technician, false)"
                   >
-                    @if (availabilitySavingId() === technician.id_tecnico && technician.disponible) {
+                    @if (
+                      availabilitySavingId() === technician.id_tecnico && technician.disponible
+                    ) {
                       Guardando...
                     } @else {
-                      Marcar no disponible
+                      No disp.
                     }
                   </button>
                   <button
@@ -237,13 +222,6 @@
                     (click)="editTechnician(technician.id_tecnico)"
                   >
                     Editar
-                  </button>
-                  <button
-                    type="button"
-                    class="secondary-button action-button"
-                    (click)="selectTechnician(technician.id_tecnico, 'view')"
-                  >
-                    Especialidades
                   </button>
                   <button
                     type="button"
@@ -305,7 +283,7 @@
                   </div>
                 </div>
 
-                  <div class="detail-grid">
+                <div class="detail-grid">
                   <div class="detail-item">
                     <span>Celular</span>
                     <strong>{{ detail.celular }}</strong>
@@ -314,10 +292,10 @@
                     <span>Telefono</span>
                     <strong>{{ detail.telefono_contacto }}</strong>
                   </div>
-                    <div class="detail-item">
-                      <span>Disponibilidad</span>
-                      <strong>{{ getAvailabilityLabel(detail.disponible, detail.estado) }}</strong>
-                    </div>
+                  <div class="detail-item">
+                    <span>Disponibilidad</span>
+                    <strong>{{ getAvailabilityLabel(detail.disponible, detail.estado) }}</strong>
+                  </div>
                   <div class="detail-item">
                     <span>Estado</span>
                     <strong>{{ detail.estado ? 'Activo' : 'Deshabilitado' }}</strong>
@@ -335,10 +313,9 @@
                 <div class="helper-card accent">
                   <strong>Disponibilidad del tecnico</strong>
                   <span>
-                    El taller puede ajustar disponibilidad operativa desde esta misma vista usando
-                    el endpoint de edicion del tecnico. Si el tecnico esta deshabilitado, la accion
-                    queda bloqueada.
+                    Cambia la disponibilidad operativa sin entrar al formulario de edicion.
                   </span>
+
                   <div class="detail-actions inline-actions">
                     <button
                       type="button"
@@ -383,11 +360,7 @@
                   >
                     Editar tecnico
                   </button>
-                  <button
-                    type="button"
-                    class="secondary-button"
-                    (click)="startCreateMode()"
-                  >
+                  <button type="button" class="secondary-button" (click)="startCreateMode()">
                     Nuevo registro
                   </button>
                 </div>
@@ -460,10 +433,10 @@
               </div>
 
               <div class="helper-card">
-                <strong>Validaciones clave</strong>
+                <strong>Nota operativa</strong>
                 <span>
-                  La contrasena solo aplica al registrar. En edicion, el backend exige al menos
-                  un cambio y no acepta el campo estado por PUT.
+                  La contrasena solo aplica al registrar. El estado del tecnico se cambia con los
+                  botones de habilitar o deshabilitar.
                 </span>
               </div>
 
@@ -531,10 +504,9 @@
                 </div>
 
                 <div class="helper-card accent">
-                  <strong>Guardado recomendado</strong>
+                  <strong>Asignacion completa</strong>
                   <span>
-                    Usa el boton principal para reemplazar la lista completa y evitar errores por
-                    duplicados al usar POST.
+                    El guardado reemplaza toda la lista actual de especialidades del tecnico.
                   </span>
                 </div>
 
@@ -543,7 +515,10 @@
 
                   @if (selectedTechnicianSpecialties().length > 0) {
                     <div class="specialty-chip-grid">
-                      @for (specialty of selectedTechnicianSpecialties(); track trackSpecialty($index, specialty)) {
+                      @for (
+                        specialty of selectedTechnicianSpecialties();
+                        track trackSpecialty($index, specialty)
+                      ) {
                         <div class="specialty-row">
                           <span class="specialty-chip">{{ specialty.nombre }}</span>
                           <button
@@ -569,7 +544,10 @@
                       <p>No se encontraron especialidades registradas en el backend.</p>
                     </div>
                   } @else {
-                    @for (specialty of specialtiesCatalog(); track trackSpecialty($index, specialty)) {
+                    @for (
+                      specialty of specialtiesCatalog();
+                      track trackSpecialty($index, specialty)
+                    ) {
                       <label class="catalog-option">
                         <input
                           type="checkbox"
@@ -607,30 +585,10 @@
             } @else {
               <div class="empty-card compact">
                 <strong>Selecciona un tecnico</strong>
-                <p>
-                  El panel de especialidades se habilita al elegir un tecnico del listado.
-                </p>
+                <p>El panel de especialidades se habilita al elegir un tecnico del listado.</p>
               </div>
             }
           }
-        </article>
-
-        <article class="management-card">
-          <div class="section-heading">
-            <div>
-              <h3>Validaciones del sistema</h3>
-              <p>Reglas operativas visibles para evitar envios invalidos al backend.</p>
-            </div>
-          </div>
-
-          <div class="rules-list">
-            @for (rule of systemRules; track trackRule($index, rule)) {
-              <div class="rule-item">
-                <strong>{{ rule.title }}</strong>
-                <span>{{ rule.description }}</span>
-              </div>
-            }
-          </div>
         </article>
       </div>
     </section>

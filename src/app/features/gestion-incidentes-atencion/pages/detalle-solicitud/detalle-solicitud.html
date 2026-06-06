@@ -162,7 +162,7 @@
           </div>
         </section>
 
-        @if (!isTechnicianView()) {
+        @if (showWorkshopOperationalSections()) {
           <section class="content-card">
             <div class="section-heading">
               <div class="header-row">
@@ -402,6 +402,22 @@
               }
             </section>
           }
+        } @else if (!isTechnicianView()) {
+          <section class="content-card">
+            <div class="section-heading">
+              <div class="header-row">
+                <div>
+                  <h2>Acciones del taller no disponibles</h2>
+                  <p>Este detalle es solo informativo porque no existe un `id_solicitud_taller` valido.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="feedback-box warning">
+              No se habilita aceptacion, rechazo ni asignacion de recursos cuando la navegacion no
+              llega con el identificador real de solicitud.
+            </div>
+          </section>
         }
       </div>
 

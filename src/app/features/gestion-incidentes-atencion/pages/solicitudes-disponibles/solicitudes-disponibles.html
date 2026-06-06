@@ -7,129 +7,26 @@
     <button type="button" (click)="cargarIncidentes()">Actualizar</button>
   </div>
 
-  @if (isTechnicianTrackingView) {
+  @if (canShowTechnicianPlaceholder) {
     <section class="tracking-panel">
       <div class="tracking-summary">
         <div>
-          <span class="panel-kicker">Incidente asignado</span>
-          <h2>#{{ technicianIncidentId }}</h2>
+          <span class="panel-kicker">Integracion pendiente</span>
+          <h2>Vista sin datos simulados</h2>
           <p>
-            Esta vista no consume incidentes disponibles del taller. Usa seguimiento del incidente
-            asignado al tecnico.
+            Esta pantalla ya no usa un incidente fijo ni datos mock. Queda visible solo como
+            placeholder controlado hasta contar con una fuente real de asignaciones o seguimiento
+            tecnico.
           </p>
         </div>
-
-        <a class="details-link" [routerLink]="[detailBaseRoute, technicianIncidentId]">
-          Ver detalle
-        </a>
       </div>
 
-      <div class="status-grid">
-        <div class="status-box">
-          <span>Estado del servicio</span>
-          <strong>{{ estadoServicioActual }}</strong>
-        </div>
-        <div class="status-box">
-          <span>Estado de asignacion</span>
-          <strong>{{ estadoAsignacionActual }}</strong>
-        </div>
-        <div class="status-box">
-          <span>Ultima actualizacion</span>
-          <strong>{{ tracking?.fecha_actualizacion || 'Pendiente' }}</strong>
-        </div>
-      </div>
-
-      <div class="route-board">
-        <div class="route-info">
-          <span class="panel-kicker">Navegacion</span>
-          <h3>{{ routeDistanceKm }}</h3>
-          <p>Distancia aproximada hasta el incidente asignado.</p>
-
-          <div class="trip-steps">
-            <div class="trip-step current">
-              <span></span>
-              <div>
-                <small>Origen</small>
-                <strong>{{ technicianLocationLabel }}</strong>
-              </div>
-            </div>
-            <div class="trip-step incident">
-              <span></span>
-              <div>
-                <small>Destino</small>
-                <strong>{{ incidentLocationLabel }}</strong>
-              </div>
-            </div>
-          </div>
-
-          <a class="map-link" [href]="mapsUrl" target="_blank" rel="noopener">
-            Iniciar ruta
-          </a>
-        </div>
-
-        <div class="live-map" aria-label="Mapa con ruta hacia el incidente">
-          <iframe
-            title="Ruta hacia el incidente asignado"
-            [src]="embeddedMapUrl"
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-          ></iframe>
-        </div>
-      </div>
-
-      <div class="location-form">
-        <button type="button" class="secondary-action" (click)="usarUbicacionDelNavegador()">
-          Detectar mi ubicacion
-        </button>
-        <button type="button" (click)="actualizarUbicacion()" [disabled]="locationSaving">
-          {{ locationSaving ? 'Enviando ubicacion...' : 'Compartir mi ubicacion' }}
-        </button>
-      </div>
-
-      <div class="realtime-box">
-        {{ wsMessage }}
-      </div>
-    </section>
-  } @else if (isTechnicianAssignmentsView) {
-    <section class="assignments-panel">
-      <div class="assignment-toolbar">
-        <div>
-          <span class="panel-kicker">Asignaciones activas</span>
-          <h2>{{ incidentes.length }} incidente asignado</h2>
-        </div>
-
-        <a class="details-link" routerLink="/tecnico/seguimiento">
-          Seguir ruta actual
-        </a>
-      </div>
-
-      <div class="cards">
-        @for (incidente of incidentes; track incidente.id_incidente) {
-          <div class="card assignment-card">
-            <div class="card-header">
-              <h3>{{ incidente.titulo || 'Incidente asignado' }}</h3>
-              <span class="priority-chip">
-                Prioridad {{ getPriorityLabel(incidente.id_prioridad) }}
-              </span>
-            </div>
-
-            <div class="card-meta">
-              <span>#{{ incidente.id_incidente }}</span>
-              <span>{{ incidente.estado_servicio_actual || 'EN_CAMINO' }}</span>
-            </div>
-
-            <p>{{ incidente.descripcion_texto }}</p>
-
-            <div class="assignment-actions">
-              <a class="details-link" routerLink="/tecnico/seguimiento">
-                Ver ruta
-              </a>
-              <a class="details-link secondary-link" [routerLink]="[detailBaseRoute, incidente.id_incidente]">
-                Ver detalle
-              </a>
-            </div>
-          </div>
-        }
+      <div class="empty-card">
+        <h3>Sin navegacion falsa</h3>
+        <p>
+          En este bloque removimos acciones y rutas asociadas a incidentes simulados para no
+          navegar con identificadores inventados.
+        </p>
       </div>
     </section>
   } @else {
@@ -162,10 +59,17 @@
             <button
               type="button"
               class="details-link details-link-button"
+              [disabled]="!canOpenDetalle(incidente)"
               (click)="abrirDetalle(incidente)"
             >
-              Ver detalle
+              {{ canOpenDetalle(incidente) ? 'Ver detalle' : 'Detalle no disponible' }}
             </button>
+
+            @if (!canOpenDetalle(incidente)) {
+              <small class="card-helper">
+                Falta `id_solicitud_taller`; no se navega con `id_incidente`.
+              </small>
+            }
           </div>
         }
       </div>

@@ -15,24 +15,16 @@ export class InicioAdmin {
       description: 'Supervisa roles, accesos y bitacora del sistema.',
     },
     {
-      title: 'Gestion de Clientes',
-      description: 'Consulta clientes, vehiculos, pagos y calificaciones registradas.',
+      title: 'Seguimiento y Monitoreo',
+      description: 'Consulta historial del incidente y trazabilidad operativa.',
     },
     {
-      title: 'Gestion Operativa de Taller y Tecnico',
-      description: 'Monitorea talleres, tecnicos, servicios y unidades moviles.',
+      title: 'Inteligencia Estrategica',
+      description: 'Revisa metricas de incidentes y comisiones de la plataforma.',
     },
     {
-      title: 'Gestion de Incidentes y Atencion',
-      description: 'Audita incidentes, solicitudes, asignaciones y estados del servicio.',
-    },
-    {
-      title: 'Seguimiento y Monitoreo del Servicio',
-      description: 'Consulta estados, notificaciones, historiales y trazabilidad operativa.',
-    },
-    {
-      title: 'Inteligencia y Gestion Estrategica',
-      description: 'Revisa analisis IA, metricas y comisiones de plataforma.',
+      title: 'Acceso rapido',
+      description: 'Entra a roles, bitacora, historial, metricas y comisiones desde el menu.',
     },
   ];
 }

@@ -10,8 +10,8 @@
 
       <h1>Inicia sesion y accede a la plataforma</h1>
       <p class="aside-copy">
-        Ingresa como cliente, taller, tecnico o administrador para continuar con
-        la operacion y seguimiento del servicio.
+        Ingresa con tu cuenta de taller, tecnico o administrador para continuar
+        con la operacion y seguimiento del servicio.
       </p>
 
       <div class="aside-features">
@@ -43,22 +43,6 @@
         <a class="back-link ui-back-link" routerLink="/">Volver al inicio</a>
         <h2>Bienvenido de nuevo</h2>
         <p>Ingresa tus credenciales para acceder al sistema.</p>
-      </div>
-
-      <div class="access-type">
-        <span class="section-label ui-field-label">Tipo de acceso</span>
-        <div class="access-options">
-          @for (access of accessTypes; track access.id) {
-            <button
-              type="button"
-              class="access-chip"
-              [class.active]="selectedAccess === access.id"
-              (click)="selectAccess(access.id)"
-            >
-              {{ access.label }}
-            </button>
-          }
-        </div>
       </div>
 
       <form class="login-form" [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -121,14 +105,9 @@
         </div>
 
         <div class="form-meta">
-          <label class="checkbox-row">
-            <input type="checkbox" />
-            <span>Recordar sesion</span>
-          </label>
-
-          <a class="inline-link ui-inline-link" href="mailto:soporte@autoassist.ai">
-            Olvidaste tu contrasena?
-          </a>
+          <span class="helper-copy">
+            El acceso se habilita segun el rol devuelto por el backend.
+          </span>
         </div>
 
         @if (errorMessage) {

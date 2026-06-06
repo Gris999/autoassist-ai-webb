@@ -22,23 +22,11 @@ export class Login {
   loading = false;
   errorMessage = '';
   showPassword = false;
-  selectedAccess = 'cliente';
-
-  readonly accessTypes = [
-    { id: 'cliente', label: 'Cliente' },
-    { id: 'taller', label: 'Taller' },
-    { id: 'tecnico', label: 'Tecnico' },
-    { id: 'admin', label: 'Admin' },
-  ];
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
   });
-
-  selectAccess(accessId: string): void {
-    this.selectedAccess = accessId;
-  }
 
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;

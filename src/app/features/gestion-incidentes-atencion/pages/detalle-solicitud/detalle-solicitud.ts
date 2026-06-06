@@ -104,6 +104,13 @@ export class DetalleSolicitud implements OnInit {
     () => this.detail() ?? this.toPreviewDetail(this.previewIncident())
   );
   readonly isTechnicianView = computed(() => this.router.url.startsWith('/tecnico'));
+  readonly hasValidWorkshopRequestId = computed(() => {
+    const data = this.displayData();
+    return !!data && data.id_solicitud_taller > 0;
+  });
+  readonly showWorkshopOperationalSections = computed(
+    () => !this.isTechnicianView() && this.hasValidWorkshopRequestId()
+  );
   readonly canRespondRequest = computed(() => {
     const detail = this.detail();
     return (
@@ -634,8 +641,8 @@ export class DetalleSolicitud implements OnInit {
       id_taller: 0,
       distancia_km: null,
       puntaje_asignacion: null,
-      estado_solicitud: 'PENDIENTE',
-      fecha_envio: preview.fecha_reporte,
+      estado_solicitud: preview.estado_solicitud || (preview.id_solicitud_taller ? 'PENDIENTE' : 'NO_DISPONIBLE'),
+      fecha_envio: preview.fecha_envio ?? preview.fecha_reporte,
       fecha_respuesta: null,
       titulo_incidente: preview.titulo,
       descripcion_texto: preview.descripcion_texto ?? null,

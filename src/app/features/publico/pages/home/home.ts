@@ -12,42 +12,30 @@ import { RouterLink } from '@angular/router';
 export class Home {
   readonly roleCards = [
     {
-      title: 'Cliente',
-      description:
-        'Reporta incidentes, adjunta evidencia y consulta el estado de tu auxilio.',
-      icon: 'C',
-    },
-    {
       title: 'Taller',
       description:
-        'Visualiza solicitudes, acepta atenciones y asigna tecnicos o unidades moviles.',
+        'Gestiona solicitudes disponibles, cobertura, tecnicos y unidades moviles desde el panel operativo.',
       icon: 'T',
-    },
-    {
-      title: 'Tecnico',
-      description:
-        'Consulta incidentes asignados, actualiza ubicacion y registra el avance del servicio.',
-      icon: 'Tec',
     },
     {
       title: 'Administrador',
       description:
-        'Supervisa roles, metricas, comisiones y trazabilidad del sistema.',
+        'Supervisa roles, bitacora, metricas e indicadores financieros de la plataforma.',
       icon: 'A',
     },
   ];
 
   readonly services = [
-    'Reporte de incidentes con evidencia multimodal',
-    'Asignacion de talleres y tecnicos segun prioridad',
-    'Seguimiento del servicio y notificaciones en tiempo real',
-    'Resumen inteligente del incidente para agilizar la atencion',
+    'Gestion de disponibilidad, cobertura y horarios del taller',
+    'Administracion de tecnicos, especialidades y unidades moviles',
+    'Seguimiento del historial operativo de incidentes',
+    'Supervision administrativa de roles, bitacora, metricas y comisiones',
   ];
 
   readonly steps = [
-    'El cliente reporta el incidente y comparte ubicacion.',
-    'La plataforma analiza el caso y prioriza la atencion.',
-    'Se asigna el taller mas adecuado con tecnico disponible.',
-    'El servicio se monitorea hasta el cierre, pago y calificacion.',
+    'El taller registra su operacion y configura cobertura, personal y unidades.',
+    'El equipo operativo ingresa al panel para revisar solicitudes y seguimiento.',
+    'La plataforma centraliza historial, estados y control del servicio.',
+    'Administracion supervisa accesos, auditoria, metricas y comisiones.',
   ];
 }
