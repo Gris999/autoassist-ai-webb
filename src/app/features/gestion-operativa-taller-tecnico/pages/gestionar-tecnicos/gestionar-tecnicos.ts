@@ -19,6 +19,7 @@ import { WorkshopOperationalService } from '../../services/workshop-operational.
 type EstadoFilter = 'todos' | 'activos' | 'deshabilitados';
 type DisponibilidadFilter = 'todos' | 'disponibles' | 'no_disponibles';
 type TechnicianEditorMode = 'create' | 'edit' | 'view';
+type SidePanelTab = 'detail' | 'specialties';
 
 @Component({
   selector: 'app-gestionar-tecnicos',
@@ -51,6 +52,7 @@ export class GestionarTecnicos implements OnInit {
   readonly specialtiesByTechnician = signal<Record<number, Especialidad[]>>({});
   readonly selectedTechnicianId = signal<number | null>(null);
   readonly selectedTechnicianDetail = signal<TecnicoDetalle | null>(null);
+  readonly activeSidePanel = signal<SidePanelTab>('detail');
 
   readonly filtersForm = this.fb.nonNullable.group({
     search: [''],
@@ -258,6 +260,7 @@ export class GestionarTecnicos implements OnInit {
 
   startCreateMode(): void {
     this.editorMode.set('create');
+    this.activeSidePanel.set('detail');
     this.selectedTechnicianId.set(null);
     this.selectedTechnicianDetail.set(null);
     this.configureTechnicianFormForMode('create');
@@ -272,6 +275,7 @@ export class GestionarTecnicos implements OnInit {
     mode: TechnicianEditorMode = 'view',
     forceSpecialtiesReload = true,
   ): void {
+    this.activeSidePanel.set('detail');
     this.selectedTechnicianId.set(idTecnico);
     this.selectionLoading.set(true);
     this.errorMessage.set('');
@@ -320,6 +324,10 @@ export class GestionarTecnicos implements OnInit {
 
   editTechnician(idTecnico: number): void {
     this.selectTechnician(idTecnico, 'edit');
+  }
+
+  setActiveSidePanel(tab: SidePanelTab): void {
+    this.activeSidePanel.set(tab);
   }
 
   cancelTechnicianEditor(): void {
